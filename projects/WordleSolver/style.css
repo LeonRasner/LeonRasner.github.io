@@ -1,0 +1,317 @@
+body {
+    background-color: #121213;
+    color: #FFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: sans-serif;
+    margin: 0 0.5rem 0.5rem 0.5rem;
+}
+
+footer a {
+    text-decoration: none;
+    color: #3a3a3c;
+}
+
+footer {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: #3a3a3c;
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #3a3a3c;
+    margin: 0 0 0.5rem 0;
+    padding: 0.4vh;
+}
+
+header h1 {
+    font-size: clamp(1.5rem,4vh,2.2rem);
+    text-align: center;
+}
+
+#headerLeft,
+#headerRight {
+    width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    margin: 0 2rem 0 2rem;
+}
+
+#headerCenter {
+    font-family: monospace;
+    font-weight: bolder;
+}
+
+#help {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.4rem;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #666;
+    border-radius: 100%;
+    margin: 0 0 0 1rem;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.row {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.btnRow {
+    display: none;
+}
+
+.btnClickable {
+    display: block;
+    background-color: rgb(67, 184, 67);
+    height: 1.5rem;
+    width: 1.5rem;
+    border-radius: 1rem;
+    border: none;
+    margin: 0 -2.6rem 0 15px;
+}
+
+.btnWait {
+    display: block;
+    background-color: #b59f3b;
+    height: 1.5rem;
+    width: 1.5rem;
+    border-radius: 1rem;
+    border: none;
+    margin: 0 -2.6rem 0 15px;
+}
+
+.btnClickableNext {
+    display: block;
+    background-color: #538d4e;
+    height: 1.5rem;
+    width: 1.5rem;
+    border-radius: 1rem;
+    border: none;
+    margin: 0 -2.6rem 0 15px;
+}
+
+.cell {
+    width: 6.2vh;
+    height: 6.2vh;
+    margin: 0.15rem;
+    font-size: 3.2vh;
+    font-weight: 600;
+    border-color: #3a3a3c;
+    border-width: 0.25vh;
+    border-style: solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none;
+}
+
+.clickable {
+    border-color: #666;
+}
+
+.clickableResultEmpty {
+    background-color: none;
+}
+
+.clickableResultYes {
+    background-color: #538d4e;
+}
+
+.clickableResultNo {
+    background-color: #3a3a3c;
+}
+
+.clickableResultAlmost {
+    background-color: #b59f3b;
+}
+
+.selected {
+    border-color: #538d4e;
+}
+
+.outputContainer {
+    margin: 3vh 0 0 0;
+    text-align: center;
+}
+
+#output {
+    margin-top: 1rem;
+    color: #538d4e;
+    font-weight: 600;
+    font-size: 2em;
+    text-transform: uppercase;
+}
+
+#btnAnother {
+    background-color: #252526;
+    border-radius: 0.3rem;
+    padding: 0.3rem 0.6rem;
+    border: none;
+    color: #666;
+    margin: 1rem 0 0 0;
+    text-align: center;
+    cursor:pointer;
+}
+
+/* Virtual Keyboard */
+
+#keyboardContainer {
+    display: flex;
+    flex-direction: column;
+    margin: 0.4vh 0 0 0;
+}
+
+.keyRow {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.key {
+    margin: 0.16rem;
+    width: clamp(1rem,5.2vh,8.5vw);
+    height: clamp(1.5rem,7vh,13vw);
+    border-radius: 0.6vh;
+    border: none;
+    background-color: #818384;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.keySpecial {
+    margin: 0.16rem;
+    width: clamp(1rem,8.1vh,13vw);
+    height: clamp(1.5rem,7vh,13vw);
+    border-radius: 5px;
+    border: none;
+    background-color: #818384;
+    color: #ffffff;
+    cursor:pointer;
+}
+
+/* Switch - https://www.w3schools.com/howto/howto_css_switch.asp */
+
+/* The switch - the box around the slider */
+.switch {
+    margin: 0 0.5rem 0 0.5rem;
+    position: relative;
+    display: inline-block;
+    width: 3rem;
+    height: 1.5rem;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #252526;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 1rem;
+    width: 1rem;
+    left: 4px;
+    bottom: 4px;
+    background-color: #4e4e50;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked+.slider {
+    background-color: #252526;
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px #252526;
+}
+
+input:checked+.slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+@media only screen and (max-width: 1200px) {
+    #headerRight,
+    #headerLeft {
+        width: auto;
+        margin: .2rem;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+    #headerRight,
+    #headerLeft {
+        display: none;
+    }
+
+    header {
+        justify-content: center;
+    }
+
+    #spanRight,
+    #spanLeft {
+        display: none;
+      }
+
+    #headerRight,
+    #headerLeft {
+        width: auto;
+        margin: 0;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+header h1 {
+    font-size: 1.5rem;
+}
+}
