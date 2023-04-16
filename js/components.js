@@ -19,6 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadComponent('components/header.html', headerEl);
     }
     if (footerEl) {
-        loadComponent('components/footer.html', headerEl);
+        loadComponent('components/footer.html', footerEl);
     }
 })
