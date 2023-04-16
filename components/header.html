@@ -1,5 +1,20 @@
 <header>
-    <div style="height: 40px; width: 100vw; padding: 0; margin: 0; display: flex; align-items: center; border-bottom: 1px solid darkgray;">
-        <a href="../index.html" style="font-family: Anonymous Pro, sans-serif; text-decoration: none; color: 3AAD46; padding: 15px;">Home</a>
+    <div style="height: 40px; width: 100vw; padding: 0; margin: 0; display: flex; align-items: center; border-bottom: 1px solid rgb(126, 126, 126);">
+        <a id="homeLink" href="/index.html" class="nav">Home</a>
+        <a id="projectsLink" href="/projects/index.html" class="nav">Projects</a>
     </div>
-</header>   
+</header>
+
+<style>
+    .nav {
+        font-family: "Anonymous Pro";
+        text-decoration: none;
+        color: rgb(126, 126, 126);
+        padding: 15px;
+    }
+
+    .activeNav {
+        color: #3AAD46;
+        font-weight: 700;
+    }
+</style>

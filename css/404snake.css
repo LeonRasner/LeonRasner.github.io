@@ -1,7 +1,40 @@
+
 canvas {
     position: absolute;
     z-index: -1;
-    width: 100vw;
-    height: 100vh;
-    /* background-color: #00000055; */
+    width: min(100vw,90vh);
+    height: min(100vw,90vh);
+    background-color: #ffffff;
 }
+#StartSnake {
+    font-weight: 600;
+    font-size: large;
+    text-align: center;
+}
+.animate {
+    background: linear-gradient(
+        to right,
+        #00ff51 20%,
+        rgb(255, 0, 0) 40%,
+        rgb(0, 115, 255) 60%,
+        #f710ff 80%
+        );
+    background-size: 200% auto;
+    color: #000;
+    background-clip: text;
+    text-fill-color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    
+    animation: shine 0.7s linear infinite;
+
+  }
+
+  .playing {
+    background-color: #dcdcdc;
+  }
+  @keyframes shine {
+    to {
+      background-position: 200% center;
+    }
+  }
