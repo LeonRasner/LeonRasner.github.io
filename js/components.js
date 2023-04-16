@@ -13,8 +13,12 @@ function loadComponent (componentName, targetEl) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const headerEl = document.querySelector('[data-component="header"]');
+    const footerEl = document.querySelector('[data-component="footer"]');
 
     if (headerEl) {
         loadComponent('components/header.html', headerEl);
+    }
+    if (footerEl) {
+        loadComponent('components/footer.html', headerEl);
     }
 })

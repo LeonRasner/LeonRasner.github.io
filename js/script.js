@@ -9,8 +9,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
         let accent = document.createElement("div");
         accent.id = 'trackerAccent' + i;
         element.appendChild(accent);
-        console.log(element)
-        console.log(accent)
     }
     //Save Accent elements to trackerAccent array
     for (let i = 1; i <= numAccents; i++) {
