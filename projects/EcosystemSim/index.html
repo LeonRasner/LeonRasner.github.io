@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width" name="viewport" user-scalable=0 />
+    <link rel="stylesheet" href="/css/style.css?v=2">
+    <link rel="stylesheet" href="/css/EcoStyle.css?v=2">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+</head>
+
+<body>
+    <!-- header placeholder -->
+    <div data-component="header"></div>
+    <!-- -- -->
+    <div id="EvoContent">
+        <canvas id="evoCanvas" width="1000" height="1000"></canvas>
+        <div class="UiMainContainer">
+            <div id="gameControls" class="UiContainer">
+                <h4>Controls</h4>
+                <label for="gameSpeed">Simulation Speed:</label>
+                <input type="range" id="gameSpeed" min="1" max="100" value="30" step="1">
+                <br>
+                <button id="pauseButton">Pause</button>
+                <br>
+                <button id="resetButton">Reset Simulation</button>
+            </div>
+            <div id="create Species" class="UiContainer">
+                <h4>Create New Species</h4>
+                <label for="SpeciesName">Species Name:</label>
+                <input type="text" id="SpeciesName" value="New Species">
+                <br>
+                <label for="SpeciesColor">Color:</label>
+                <input type="color" value="#FF9999" id="SpeciesColor" />
+                <br>
+                <label for="SpeciesSpeed">Speed:</label>
+                <input type="range" id="SpeciesSpeed" min="1" max="10" value="5" step="1">
+                <br>
+                <label for="SpeciesDirection">Likelyhood of random movement:</label>
+                <input type="range" id="SpeciesDirection" min="0.01" max="0.99" value="0.3" step="0.01">
+                <br>
+                <label for="SpeciesAgression">Aggressiveness:</label>
+                <input type="range" id="SpeciesAgression" min="1" max="10" value="1" step="1">
+                <br>
+                <button id="speciesButton">Create New Species</button>
+                <p id="validationMessageCreateSpecies" style="color: red;"></p>
+            </div>
+        </div>
+        <div class="UiMainContainer">
+            
+            <div class="UiContainer">
+                <h4>Species</h4>
+                <div id="speciesListContainer">
+
+                </div>
+                <form>
+                    <input type="radio" id="randomSpwan" name="spawn_behavior" value="randomSpwan" title="Creatures will spawn in random places on map">
+                    <label for="randomSpwan" title="Creatures will spawn in random places on map">Random placement</label><br>
+                    <input type="radio" id="ClusterSpwan" name="spawn_behavior" value="ClusterSpwan"  checked="checked" title="Creatures will spawn in small randomly placed clusters on map">
+                    <label for="ClusterSpwan" title="Creatures will spawn in small randomly placed clusters">Random Cluster</label><br>
+                    <input type="radio" id="ClickSpawn" name="spawn_behavior" value="ClickSpawn" title="Creatures will span near the place on the map you click after hitting spawn">
+                    <label for="ClickSpawn" title="Creatures will span near the place on the map you click after hitting spawn">Spawn by click</label>
+                </form>
+            </br>
+                <strong style="color: green;">Choose a species and click Spawn</strong>
+                <span id="validationMessageSpeciesSpawn" style="color: red;"></span>
+            </div>
+        </div>
+    </div>
+
+
+    <footer>
+        <!-- footer placeholder -->
+        <div data-component="footer"></div>
+        <!-- -- -->
+    </footer>
+
+
+    <script src="/js/components.js"></script>
+
+    
+    <script src="/js/EcoCreatures.js"></script>
+    <script src="/js/EcoScript.js"></script>
+    <script src="/js/EcoUi.js"></script>
+</body>
+
+</html>
