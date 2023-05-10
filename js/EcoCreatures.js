@@ -95,7 +95,7 @@ class Creature {
                             this.direction = entity.direction;
                         }
                         //Kill
-                        if (Math.abs(entity.posX - this.posX) < 4 && Math.abs(entity.posY - this.posY) < 4) {
+                        if (Math.abs(entity.posX - this.posX) <= 5 && Math.abs(entity.posY - this.posY) <= 5) {
                             const index = entities.indexOf(entity);
                             if (index !== -1) {
                                 misc.push(new DeathMarker(entity.posX, entity.posY, entity.color))

@@ -22,20 +22,13 @@ speciesList.push(createSpecies("TameGreens", "green", 2, 0.3, 1));
 speciesList.push(createSpecies("QuickYellows", "yellow", 6, 0.1, 3));
 speciesList.push(createSpecies("HungryBlues", "blue", 3, 0.4, 5));
 
-// for (i = 1; i < 200; i++) {
-//     entities.push(new speciesList[0] (Math.floor(Math.random()*canvas.width),Math.floor(Math.random()*canvas.height)));
-// }
-// for (i = 1; i < 100; i++) {
-//   entities.push(new speciesList[1] (Math.floor(Math.random()*canvas.width),Math.floor(Math.random()*canvas.height)));
-// }
-// for (i = 1; i < 50; i++) {
-//   entities.push(new speciesList[2] (Math.floor(Math.random()*canvas.width),Math.floor(Math.random()*canvas.height)));
-// }
-
-// for (i = 1; i < 100; i++) {
-//     enteties.push(new Creature ('#'+ Math.floor(Math.random()*16777215).toString(16), 300+5*i, 300+5*i, 5, 0.2));
-// }
-
+//TODO: Ideas:
+//Zoom & Pan Function
+//Multiplication (eating food)
+//Death => new Food
+//Statistics / Conter
+//Dynamic Interface (Tabs or such)
+//Kill Likelyhood andor HP
 
 //Start Game
 gameLoop();
