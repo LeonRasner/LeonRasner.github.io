@@ -155,6 +155,7 @@ function drawApple() {
 }
 
 function keyDown(event) {
+    event.preventDefault();
     //up
     if (event.keyCode == 38 || event.keyCode == 87) {
         if (yvelocity == 1 || keyPressed) return; //prevent snake from moving in opposite direction
@@ -249,7 +250,7 @@ function checkGameOver() {
     //Check if game is running
     if (gameRunning && !(yvelocity === 0 && xvelocity === 0)) {
         //If snake head has left bounds, game is over;
-        if (headX < 0 || headX > tileCount || headY < 0 || headY > tileCount) {
+        if (headX < 0 || headX >= tileCount || headY < 0 || headY >= tileCount) {
             isGameOver = true;
         } else {
             //Check collision of head with body for each snakeBit
