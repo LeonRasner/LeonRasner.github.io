@@ -19,6 +19,8 @@ function setActiveNavLink() {
         activeLinkId = "homeLink";
     } else if (currentPage.includes("project")) {
         activeLinkId = "projectsLink";
+    } else if (currentPage.includes("about")) {
+        activeLinkId = "aboutLink";
     }
 
     if (activeLinkId) {
@@ -26,6 +28,11 @@ function setActiveNavLink() {
         activeLinkId.classList.add("activeNav");
       }
 
+}
+
+function updateFooterDate () {
+        const today = new Date().getFullYear()
+        document.getElementById('cYear').innerText = "© Leon Rasner " + today + " ";
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -39,7 +46,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
     }
     if (footerEl) {
-        loadComponent('/components/footer.html', footerEl);
+        loadComponent('/components/footer.html', footerEl).then(() => {
+            updateFooterDate();
+        });
     }
 })
 
