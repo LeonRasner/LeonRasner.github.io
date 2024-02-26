@@ -1,0 +1,458 @@
+
+/* About ----------------------------------------- */
+
+html {
+  scroll-behavior: smooth;
+}
+
+h4{
+  margin-block-end: .6em;
+}
+
+h5{
+  margin-block-start: .6em;
+}
+
+.containerVert {
+    max-width: 1200px;
+    width: 96vw;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0 2vw 0 2vw;
+  }
+  
+  #summary {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  #ataglance {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  #titleaboutme {
+    text-align: center;
+    margin-top: max(10vh,10vw);
+    line-height: 0.8;
+    padding-bottom: 80px;
+  }
+  
+  #headshot {
+    width: 30%;
+    min-height: 400px;
+    background: url(../images/leonrasner.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    margin: 0 auto  0 0;
+    box-shadow: 16px 16px 0px #3AAD46;
+  }
+  
+  #headerAbout {
+    background-color: #707070;
+    padding: 4px 24px 4px 24px;
+    color: white;
+    border: none;
+    text-align: left;
+  }
+  
+  #headerAbout > h2 {
+    font-size: 1.5rem ;
+  }
+  
+  .headerAboutSmall {
+    background-color: #707070;
+    padding: 4px 32px 4px 24px;
+    color: white;
+    border: none;
+    text-align: left;
+    width: fit-content;
+    margin: 64px 0 0 0;
+  }
+  
+  .headerAboutSmall > h2 {
+    font-size: 1.5rem ;
+  }
+  
+  .buttonAboutmedium {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background-color: #707070;
+    padding: 8px 32px 8px 24px;
+    color: white;
+    border: none;
+    text-align: left;
+    width: 150px;
+    margin: 64px 0 0 0;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  
+  .buttonAboutmedium:hover {
+    box-shadow: 8px 8px 0px #3AAD46;
+    transition: 0.2s;
+  }
+  
+  
+  .AboutRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .ataglanceSkill {
+    background-color: #8AE393;
+    color: white;
+    display: flex;
+    width: 49%;
+    margin: 16px 0 0 0;
+  }
+  
+  .ataglanceIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #3AAD46;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 16px;
+    aspect-ratio: 1/1;
+  }
+  
+  .ataglanceText {
+    margin: 0 0 0 1rem;
+    display: flex;
+    align-items: center;
+    font-size: 1.6rem;
+    padding-right: .6rem;
+  }
+  
+  /*  ---  */
+  .timeline {
+    position: relative;
+    margin-top: 80px;
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+  
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 160px;
+    width: 3px;
+    height: 100%;
+    background-color: #3AAD46;
+  }
+  
+  .entry {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .animate-show {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+  }
+  
+  .animate-open {
+    opacity: 1;
+    max-height: 0px;
+    padding: 0;
+    transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+    overflow: hidden;
+  }
+  
+  .animate-open.show {
+    opacity: 1;
+    max-height: 2000px;
+    padding: 2rem;
+    transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+  }
+  
+  .animate-show.show {
+    opacity: 1;
+  }
+  
+  .date {
+    width: 150px;
+    margin: 0 64px 0 0;
+  }
+  
+  .dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #8AE393;
+    position: absolute;
+    left: 154px;
+  }
+  
+  .details {
+    flex: 1;
+    margin: 0 0 0 24px;
+  }
+  
+  .details > ul {
+    padding-inline-start: 1.5rem;
+  }
+  
+  .iconrow {
+    align-self: flex-start;
+    margin-top: 1.3rem;
+  }
+  
+  .rowCentered {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .SkillDetails {
+    padding: 8px;
+    margin: 0 0 0 8px;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .Idevelopment {
+    width: 24px;
+    height: 24px;
+  
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("/images/IconDevelopment.svg");
+  }
+  .Idesign {
+    width: 24px;
+    height: 24px;
+  
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("/images/IconDesign.svg");
+  }
+  .Imanagement {
+    width: 24px;
+    height: 24px;
+  
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("/images/IconManagement.svg");
+  }
+  .Iconcept {
+    width: 24px;
+    height: 24px;
+  
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("/images/IconConcept.svg");
+  }
+  .IChevDown {
+    width: 24px;
+    height: 24px;
+  
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("/images/chevronDown.svg");
+  }
+  
+  /* -------- */
+  
+  .fullSkill {
+    background-color: #8AE393;
+    display: flex;
+    width: 100%;
+    margin: 16px 0 0 0;
+  }
+  
+  .fullIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #3AAD46;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 16px;
+    aspect-ratio: 1/1;
+  }
+  
+  .fullText {
+    margin: 0 0 0 1rem;
+    display: flex;
+    align-items: center;
+    font-size: 1.6rem;
+  }
+
+  
+  .skillExtend {
+    background-color: #8AE393;
+  }
+
+  .skillArrowDown{
+    margin-left: 1rem; 
+    color: white;
+  }
+  
+  .skillInnerContainer {
+    margin-left: 3.7rem;
+  }
+  
+  .progressRingsContainer{
+    display: flex;
+    flex-direction: row;
+    padding: 1rem 0 1rem 0;
+  }
+  
+  .progressContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 32px 0 16px;
+  }
+  
+  .progress-ring {
+    margin: 32px 0 16px 0;
+  }
+  
+  .progress-ring__circle,
+  .progress-ring__circle-progress {
+    transition: stroke-dashoffset 1s;
+    stroke-linecap: butt;
+  }
+  
+  .progress-ring__circle {
+    stroke-dasharray: 365;
+    stroke-dashoffset: 0;
+  }
+  
+  .progress-ring__circle-progress {
+    stroke-dasharray: 365;
+    stroke-dashoffset: 365;
+  }
+  
+  .letstalklink {
+    background-color: #8AE393;
+    color: white;
+    display: flex;
+    padding: 0 1.5rem 0 0;
+    margin: 16px 0 0 0;
+  }
+
+  #letstalk{
+    margin: 6rem 0 8rem 0;
+    text-align: center;
+  }
+
+  #letstalkcontainer{
+    margin: auto;
+  }
+
+  /* mobile ------------------------------------------ */
+
+@media only screen and (max-width: 1100px) {
+
+
+  #titleaboutme > h1 {
+    font-weight: bolder;
+    padding: 0 0 2rem 0;
+  }
+
+  #summary{
+    display: block;
+  }
+
+  #headshot{
+    width: 90vw;
+    aspect-ratio: 1;
+    margin: 0 auto 4rem auto;
+  }
+
+  .AboutRow{
+    display: flex;
+    flex-direction: column;
+  }
+
+  #detailsAtaglance{
+    font-weight: bold;
+    font-size: 1.3rem;
+  }
+
+  .ataglanceSkill{
+    width: 100%;
+  }
+
+  .entry {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.timeline::before {
+opacity: .2;
+left: 0;
+}
+
+.dot{
+  left: 0;
+  margin-left: -6px;
+  opacity: .5;
+}
+
+.progressRingsContainer{
+  display: flex;
+  flex-direction: column;
+}
+
+.skillInnerContainer{
+  margin-left: 0;
+}
+  
+/* 
+  #ataglance {
+    width: 100%;
+    display: block;
+  }
+
+  .ataglanceText{
+    font-size: 2.6rem;
+  }
+
+  .iconrow{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .SkillDetails{
+    margin-bottom: 1rem;
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .buttonAboutmedium{
+    width: 50vw;
+    font-size: 2.5rem;
+  }
+
+  .date{
+    font-size: 2rem;
+  }
+
+  .skillInnerContainer{
+    font-size: 3rem;
+  }
+
+  .progress-ring{
+    width: 240px;
+    height: 240px;
+  } */
+
+}
