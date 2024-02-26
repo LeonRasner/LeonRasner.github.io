@@ -32,6 +32,9 @@ speciesList.push(createSpecies("HungryBlues", "blue", 3, 0.4, 5));
 
 //Start Game
 gameLoop();
+spawnCreatures(speciesList[0], 300, "randomSpwan");
+spawnCreatures(speciesList[1], 50, "randomSpwan");
+spawnCreatures(speciesList[2], 50, "ClusterSpwan");
 
 function gameLoop() {
   if (gamePaused) return;

@@ -414,44 +414,5 @@ left: 0;
 .skillInnerContainer{
   margin-left: 0;
 }
-  
-/* 
-  #ataglance {
-    width: 100%;
-    display: block;
-  }
-
-  .ataglanceText{
-    font-size: 2.6rem;
-  }
-
-  .iconrow{
-    display: flex;
-    flex-direction: column;
-  }
-
-  .SkillDetails{
-    margin-bottom: 1rem;
-    width: 3rem;
-    height: 3rem;
-  }
-
-  .buttonAboutmedium{
-    width: 50vw;
-    font-size: 2.5rem;
-  }
-
-  .date{
-    font-size: 2rem;
-  }
-
-  .skillInnerContainer{
-    font-size: 3rem;
-  }
-
-  .progress-ring{
-    width: 240px;
-    height: 240px;
-  } */
 
 }
