@@ -20,17 +20,21 @@
 
         </div>
         <nav id="selectionHome">
-            <a href="/about/" class="buttonHome">
+            <a href="/about/" class="buttonHome noSelect">
                 <h2>ABOUT<br>ME</h2>
             </a>
-            <div class="buttonHome inactive">
-                <h2>PORT-<br>FOLIO</h2>
-            </div>
-            <a href="/projects/" class="buttonHome">
+            <a id="buttonPortfolio" onclick="portfolioLocked()" class="buttonHome inactive noSelect">
+                <h2 id="h2Portfolio">PORT-<br>FOLIO</h2>
+            </a>
+            <a href="/projects/" class="buttonHome noSelect">
                 <h2>PRO-<br>JECTS</h2>
             </a>
-
         </nav>
+        <a href="mailto:contact@leonrasner.com" id="intrestedBubble" style="display: none;">
+            <strong>Interested?</strong><br>
+            <span>Get in contact :)</span><br>
+            <strong>contact@leonrasner.com</strong>
+        </a>
     </div>
     <div class="spacer">
     </div>

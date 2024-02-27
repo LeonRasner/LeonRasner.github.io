@@ -1,6 +1,6 @@
 var numAccents = 5;
 var trackerAccent = [];
-var trackerEnabled = false;
+var trackerEnabled = true;
 
 document.addEventListener("DOMContentLoaded", function (event) {
     //Create Accent elements for Mouse-Tracker effect to array
@@ -52,3 +52,34 @@ if (trackerEnabled) {
     
     }
 }
+
+function portfolioLocked() {
+    document.getElementById("buttonPortfolio").classList.add("animatedBG");
+    document.getElementById("h2Portfolio").innerText = "LOCKED LOCKED";
+    setTimeout(x => {
+        portfolioReset();
+            showPortfolioInfo();
+    },3000);
+}
+
+function portfolioReset() {
+    document.getElementById("buttonPortfolio").classList.remove("animatedBG");
+    document.getElementById("h2Portfolio").innerText = "PORT-FOLIO"
+}
+
+function showPortfolioInfo() {
+    if(document.getElementById("intrestedBubble").style.display == "block") {
+        document.getElementById("intrestedBubble").classList.add("shake");
+        setTimeout(x => {
+            portfolioReset();
+            document.getElementById("intrestedBubble").classList.remove("shake");
+        },3000);
+    } else {
+        document.getElementById("intrestedBubble").style.display = "block";
+        setTimeout(x => {
+                document.getElementById("intrestedBubble").classList.add("show");
+        },300);
+    }
+}
+
+

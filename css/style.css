@@ -119,11 +119,10 @@ justify-content: center;
 
 .buttonHome.inactive {  
   background-color: #D9D9D9;
-  pointer-events: none;
   box-shadow: 8px 8px 0px #A7A7A7;
 }
 
-.buttonHome:hover {
+.buttonHome::not(.animate):hover {
   background-color: #363636;
   transition: 0.3s;
 }
@@ -172,8 +171,53 @@ footer {
   user-select: none; 
 }
 
+.animatedBG {
+  background: rgb(34,193,195);
+  background: linear-gradient(90deg, rgba(34,193,195,1) 0%, rgba(253,187,45,1) 51%, rgba(34,193,195,1) 100%);
+  background-size: 200% auto;
+  animation: shine 0.7s linear infinite;
+}
 
+#intrestedBubble{
+  position: absolute;
+  top: 4rem;
+  right: 1rem;
+  color: white;
+  background: linear-gradient(90deg, rgba(34,193,195,1) 0%, rgba(253,187,45,1) 51%, rgba(34,193,195,1) 100%);
+  background-size: 200% auto;
+  animation: shine 5s linear infinite;
+  padding: 0 .8rem 0 .8rem;
+  /* box-shadow: 8px 8px 0px #3AAD46; */
+  max-height: 0;
+  transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+  overflow: hidden;
+}
 
+#intrestedBubble.show{
+max-height: 500px;
+transition: max-height 1s ease-in-out, padding 0.5s ease-in-out;
+overflow: hidden;
+padding: .8rem;
+  /* box-shadow: 8px 8px 0px #3AAD46; */
+}
+
+#intrestedBubble.shake{
+  animation: tilt-shaking 0.25s linear infinite;
+}
+  
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
+@keyframes tilt-shaking {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  50% { transform: rotate(0eg); }
+  75% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
 /* mobile ------------------------------------------ */
 
 /* @media only screen and (max-width: 900px) {

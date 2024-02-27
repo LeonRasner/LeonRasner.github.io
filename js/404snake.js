@@ -1,3 +1,4 @@
+//TODO: Idea: Show Error codes matching current score: https://umbraco.com/knowledge-base/http-status-codes/
 //Initialize Canvas
 const canvas = document.getElementById('snake');
 const ctx = canvas.getContext('2d');
