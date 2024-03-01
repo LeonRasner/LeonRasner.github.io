@@ -5,11 +5,11 @@ html {
   scroll-behavior: smooth;
 }
 
-h4{
+h3{
   margin-block-end: .6em;
 }
 
-h5{
+h4{
   margin-block-start: .6em;
 }
 
@@ -105,8 +105,8 @@ h5{
   }
   
   .ataglanceSkill {
-    background-color: #8AE393;
-    color: white;
+    background-color: #a1f1a9;
+    color: #000;
     display: flex;
     width: 49%;
     margin: 16px 0 0 0;
@@ -268,7 +268,7 @@ h5{
   /* -------- */
   
   .fullSkill {
-    background-color: #8AE393;
+    background-color: #a1f1a9;
     display: flex;
     width: 100%;
     margin: 16px 0 0 0;
@@ -299,7 +299,8 @@ h5{
 
   .skillArrowDown{
     margin-left: 1rem; 
-    color: white;
+    color: #000;
+    font-size: 1rem;
   }
   
   .skillInnerContainer {
@@ -340,8 +341,8 @@ h5{
   }
   
   .letstalklink {
-    background-color: #8AE393;
-    color: white;
+    background-color: #a1f1a9;
+    color: #000;
     display: flex;
     padding: 0 1.5rem 0 0;
     margin: 16px 0 0 0;
@@ -351,6 +352,9 @@ h5{
   #letstalk{
     margin: 6rem 0 8rem 0;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   #letstalkcontainer{

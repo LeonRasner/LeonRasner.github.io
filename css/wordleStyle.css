@@ -287,6 +287,9 @@ input:checked+.slider:before {
 .slider.round:before {
     border-radius: 50%;
 }
+.nav {
+    color: #fff !important;
+}
 
 @media only screen and (max-width: 1200px) {
     #headerRight,

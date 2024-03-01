@@ -28,12 +28,13 @@ h2 {
   font-size: min(6vw,6vh); 
 }
 h3 {
-  font-family: "Press Start 2P", monospace;
-  font-size: 1.6rem; 
+  font-family: "Anonymous Pro", monospace;
+  font-size: 1.3rem;
+  font-weight: bolder;
 }
 h4 {
   font-family: "Anonymous Pro", monospace;
-  font-size: 1.3rem;
+  font-size: 1rem;
   font-weight: bolder;
 }
 p {
