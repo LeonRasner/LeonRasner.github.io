@@ -56,10 +56,10 @@ if (trackerEnabled) {
 function portfolioLocked() {
     document.getElementById("buttonPortfolio").classList.add("animatedBG");
     document.getElementById("h2Portfolio").innerText = "LOCKED LOCKED";
+    showPortfolioInfo();
     setTimeout(x => {
-        portfolioReset();
-            showPortfolioInfo();
-    },3000);
+            portfolioReset();  
+    },2000);
 }
 
 function portfolioReset() {
@@ -73,12 +73,14 @@ function showPortfolioInfo() {
         setTimeout(x => {
             portfolioReset();
             document.getElementById("intrestedBubble").classList.remove("shake");
-        },3000);
+        },3500);
     } else {
-        document.getElementById("intrestedBubble").style.display = "block";
         setTimeout(x => {
+            document.getElementById("intrestedBubble").style.display = "block";
+            setTimeout(x => {
                 document.getElementById("intrestedBubble").classList.add("show");
         },300);
+    },1000);
     }
 }
 
