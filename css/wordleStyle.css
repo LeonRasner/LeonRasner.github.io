@@ -17,6 +17,10 @@ body {
     margin: 0 0.5rem 0.5rem 0.5rem;
 }
 
+#containerMain {
+    display: flex;
+}
+
 footer a {
     text-decoration: none;
     color: #3a3a3c;
@@ -90,32 +94,38 @@ footer {
 
 .btnClickable {
     display: block;
-    background-color: rgb(67, 184, 67);
-    height: 1.5rem;
-    width: 1.5rem;
-    border-radius: 1rem;
+    background-image: url('/images/EnterKey.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: #0000;
+    height: 3rem;
+    width: 2.5rem;
     border: none;
-    margin: 0 -2.6rem 0 15px;
+    margin: 0 -3.5rem 0 15px;
 }
 
 .btnWait {
     display: block;
-    background-color: #b59f3b;
-    height: 1.5rem;
-    width: 1.5rem;
-    border-radius: 1rem;
+    background-image: url('/images/NoEnterKey.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: #0000;
+    height: 3rem;
+    width: 2.5rem;
     border: none;
-    margin: 0 -2.6rem 0 15px;
+    margin: 0 -3.5rem 0 15px;
 }
 
 .btnClickableNext {
     display: block;
-    background-color: #538d4e;
-    height: 1.5rem;
-    width: 1.5rem;
-    border-radius: 1rem;
+    background-image: url('/images/EnterKey.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: #0000;
+    height: 3rem;
+    width: 2.5rem;
     border: none;
-    margin: 0 -2.6rem 0 15px;
+    margin: 0 -3.5rem 0 15px;
 }
 
 .cell {
@@ -291,11 +301,78 @@ input:checked+.slider:before {
     color: #fff !important;
 }
 
+/* HELP */
+
+
+#helpSection {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+#helpBox{
+    background-color: #555;
+    border-radius: .5rem;
+    padding: 1rem;
+    max-width: 25vw;
+    display: block;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    font-family: monospace;
+    font-size: 1rem;
+}
+
+#helpBox.show{
+    background-color: #555;
+    border-radius: .5rem;
+    padding: 1rem;
+    max-width: 30vw;
+    display: block;
+    opacity: 1;
+    transition: opacity 1s ease-in-out;
+}
+
+#helpBox::after{
+    content: '';
+    position: absolute;
+    display: block;
+    width: 0;
+    z-index: 1;
+    border-style: solid;
+    border-color: transparent #555;
+    border-width: .7rem 0 .7rem .7rem;
+    top: 50%;
+    right: -.6rem;
+    margin-top: -.7rem;
+}
+
 @media only screen and (max-width: 1200px) {
     #headerRight,
     #headerLeft {
         width: auto;
-        margin: .2rem;
+        margin: .2rem; 
+    }
+    #helpBox{
+        max-width: 90vw;
+    }
+    
+    #helpBox.show{
+
+        max-width: 90vw;
+    }
+    #helpBox::after{
+        content: '';
+        position: absolute;
+        display: block;
+        width: 0;
+        z-index: 1;
+        border-style: solid;
+        border-color: #555 transparent;
+        border-width: 0 .9rem .9rem;
+        left: 50%;
+        top: -.2rem;
+        margin-left: -.7rem;
     }
 }
 

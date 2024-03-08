@@ -12,6 +12,11 @@ $(document).ready(function () {
     currentRec = querryWords(null);
     $("#output").text(currentRec);
 
+    //Show Initial help
+    setTimeout(x=> {
+        setHelpBox("cell-1-1", "Enter the same word as in your current wordle game or the suggestion below.");
+    }, 3000)
+
 
     //Select container by click
     $("#inputContainer").on('click', '.clickable', function (e) {
@@ -141,6 +146,8 @@ function inputResults() {
         if (lettersInput > 4) {
             $(`#btnRow${currentRow}`).removeClass("btnWait");
             $(`#btnRow${currentRow}`).addClass("btnClickableNext");
+            //Help 4
+            setHelpBox(`cell-1-${currentRow}`, "When you're done, press ENTER to update the suggestion");
             lettersInput = 0;
         }
     });
@@ -199,6 +206,8 @@ function enterWord() {
         if (lastClicked != null) { lastClickedTemp = lastClicked };
         lastClicked = null;
         $(`#btnRow${currentRow}`).addClass("btnWait")
+        //Help 3
+        setHelpBox(`cell-1-${currentRow}`, "Now choose the right and wrong letters by clicking on them multiple times.");
         //Input Results & Unlock .btnClickableNext
         inputResults()
     }
@@ -229,6 +238,8 @@ function finishRow () {
         autofillRec(currentRec);
     }
     selectNextline();
+    //Help 5
+    setHelpBox(`cell-1-${currentRow}`, "Enter the word suggested below, or try something else.");
 }
 
 function anotherRec() {
@@ -254,6 +265,8 @@ function autofillRec(recomendation) {
 function checkRowSelected() {
     if ($(".clickable:empty").length == 0 && $(".btnClickableNext").length == 0 && $(".btnWait").length == 0 ) {
         $(`#btnRow${currentRow}`).addClass("btnClickable");
+        //Help 2
+        setHelpBox(`cell-1-${currentRow}`, "Press ENTER to lock in your word");
         return true;
     } else {
         $(`#btnRow${currentRow}`).removeClass("btnClickable");
@@ -277,3 +290,6 @@ function checkBtnClickable () {
     if ($(".btnClickable").length != 0) return true;
     else return false;
 }
+
+
+  

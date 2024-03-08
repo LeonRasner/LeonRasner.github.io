@@ -77,6 +77,7 @@ function startGame() {
     document.getElementById("404h1").classList.add("animate");
     document.getElementById("body").classList.add("playing");
     document.getElementById("404h2").innerText = "Page Not Found";
+    document.getElementById("404h1").innerText = "404";
 
     //Set variables
     gameRunning = true;
