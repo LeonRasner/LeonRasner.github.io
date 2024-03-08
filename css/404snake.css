@@ -30,6 +30,19 @@ canvas {
 
   }
 
+  .animateWin {
+    background: linear-gradient(
+        to right,
+        #00ff51 20%,
+        rgb(255, 0, 0) 40%,
+        rgb(0, 115, 255) 60%,
+        #f710ff 80%
+        );
+    background-size: 200% auto; 
+    animation: shine 3s linear infinite;
+
+  }
+
   .playing {
     background-color: #dcdcdc;
   }

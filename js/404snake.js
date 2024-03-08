@@ -30,9 +30,9 @@ let appleY = 1;
 
 //Sprites
 const appleImage = new Image();
-appleImage.src = '/images/Apple.png';
+appleImage.src = '/images/Apple2.png';
 const snakeImage = new Image();
-snakeImage.src = '/images/SnakePart.png';
+snakeImage.src = '/images/SnakePart2.png';
 
 //Listen for start Game
 document.getElementById('StartSnake').addEventListener('click', evt => {
@@ -76,6 +76,7 @@ function startGame() {
     document.getElementById("StartSnake").classList.remove("animate");
     document.getElementById("404h1").classList.add("animate");
     document.getElementById("body").classList.add("playing");
+    document.getElementById("404h2").innerText = "Page Not Found";
 
     //Set variables
     gameRunning = true;
@@ -240,10 +241,27 @@ function checkCollision() {
 function drawScore(score) {
     let score404 = score + 401;
     document.getElementById("404h1").innerText = score404.toString();
-    //Hiede tutorial after first oint
+    drawCodes(score);
+    //Hiede tutorial after first point
     if (snakeLength > 3) {
         document.getElementById("404p").innerText = ""
     }
+}
+
+function drawCodes(score) {
+    let code = errors[score + 401];
+    if (code != null) {
+        document.getElementById("404h2").innerText = code;
+        if (score + 401 === 511) {
+            win();
+        }
+    } else {
+        document.getElementById("404h2").innerText = "???";
+    }
+}
+
+function win() {
+    document.getElementById("body").classList.add("animateWin");
 }
 
 function checkGameOver() {
@@ -284,4 +302,43 @@ class snakeBit {
         this.xPos = x;
         this.yPos = y;
     }
+}
+
+var errors = {
+    404 : "Page Not Found",
+    405	: "Method Not Allowed",
+    406	: "Not Acceptable",
+    407	: "Proxy Authentication Required",
+    408	: "Request Timeout",
+    409	: "Conflict",
+    410	: "Gone",
+    411	: "Length Required",
+    412	: "Precondition Failed",
+    413	: "Payload Too Large",
+    414	: "URI Too Long",
+    415	: "Unsupported Media Type",
+    416	: "Range Not Satisfiable",
+    417	: "Expectation Failed",
+    418	: "I'm a Teapot",
+    421	: "Misdirected Request",
+    422	: "Unprocessable Entity",
+    423	: "Locked",
+    424	: "Failed Dependency",
+    425	: "Too Early",
+    426	: "Upgrade Required",
+    428	: "Precondition Required",
+    429	: "Too Many Requests",
+    431	: "Request Header Fields Too Large",
+    451	: "Unavailable For Legal Reasons",
+    500	: "Internal Server Error",
+    501	: "Not Implemented",
+    502	: "Bad Gateway",
+    503	: "Service Unavailable",
+    504	: "Gateway Timeout",
+    505	: "HTTP Version Not Supported",
+    506	: "Variant Also Negotiates",
+    507	: "Insufficient Storage",
+    508	: "Loop Detected",
+    510	: "Not Extended",
+    511	: "Network Authentication Required"
 }
