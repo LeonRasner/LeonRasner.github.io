@@ -6,15 +6,19 @@
     <title>Wordle Solver - Leon Rasner</title>
     <meta name="description" content="A fun coding experiment to help you solve wordle games.">
     <link rel="stylesheet" href="/css/wordleStyle.css?v=3">
+    <link rel="stylesheet" href="/css/help.css">
     <link rel="icon" type="image/x-icon" href="../../images/favicon.ico">
     <script src="jquery-3.6.3.min.js"></script>
     <script src="data.js"></script>
     <script src="processor.js"></script>
     <script src="script.js?v=2"></script>
-    <script src="help.js?"></script>
+    <script src="/js/help.js?v=2"></script>
 </head>
 
 <body>
+    <div id="helpSection">
+        <span id="helpBox">help</span>
+    </div>
         <!-- header placeholder -->
         <div data-component="header"></div>
         <!-- -- -->
@@ -35,17 +39,13 @@
         </div>
 
         <div id="headerRight" title="Enable to get better starting recomendtions (less fun)">
-            <span id="spanRight">Use easy mode</span>
+            <span id="spanRight">Disable easy mode</span>
             <label class="switch">
                 <input type="checkbox" id="tryhardSwitch">
                 <span class="slider round"></span>
             </label>
         </div>
     </header>
-    <div id="containerMain">
-        <div id="helpSection">
-                <span id="helpBox">help</span>
-        </div>
         <div class="content">
     
             <div id="inputContainer">
@@ -160,7 +160,6 @@
                 </div>
                 <button type="button" id="btnAnother">give me another word</button>
             </div>
-        </div>
     </div>
     <script src="../../js/components.js"></script>
 </body>

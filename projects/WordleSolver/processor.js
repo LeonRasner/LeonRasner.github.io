@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
         tryhard = false;
         currentRec = querryWords(null);
         $("#output").text(currentRec);
-        $("#recBlurb").text(`I'm ${getcertainty()}% sure you should try`);
+        writeCertainty();
       }
     });
   });
@@ -73,9 +73,28 @@ function getRandomWord () {
 }
 
 function getcertainty () {
+    if (wordList.length == 0) return 0;
     return Math.round((1 / wordList.length * 100) * 1000) / 1000;
 }
 
 function pushWordToBack () {
     wordList.push(wordList.shift());
+}
+
+function writeCertainty() {
+    debugger
+    let certainty = getcertainty();
+    if (certainty != 0) {
+        $("#recBlurb").text(`I'm ${certainty}% sure you should try`);
+    } else {
+        impossibleWord();
+    }
+}
+
+function impossibleWord() {
+    $("#recBlurb").text(`The word you are looking for does not seem to exist. Did you enter something incorrectly? Please reload the page and try again.`);
+    $("#recBlurb").toggleClass('falseInput');
+    $("#output").text('???');
+    $("#output").toggleClass('falseInput');
+    throw new Error("Impossibe input. Reload Page")
 }

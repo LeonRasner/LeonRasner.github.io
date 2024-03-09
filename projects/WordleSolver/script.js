@@ -6,17 +6,17 @@ var autofill = false;
 
 $(document).ready(function () {
     //TODO: i won button
-    //TODO: Instructions & Help Section
 
     //Asign 5 letter word as Recomendation
     currentRec = querryWords(null);
     $("#output").text(currentRec);
 
-    //Show Initial help
-    setTimeout(x=> {
-        setHelpBox("cell-1-1", "Enter the same word as in your current wordle game or the suggestion below.");
-    }, 3000)
+    //Enable easy mode by default
+    $("#tryhardSwitch").click();
 
+    //Show Initial help
+    defineHelpBox('helpBox');
+    moveHelpBox("cell-1-1", "Enter the same word as in your current wordle game, or try the suggestion below.");
 
     //Select container by click
     $("#inputContainer").on('click', '.clickable', function (e) {
@@ -147,7 +147,7 @@ function inputResults() {
             $(`#btnRow${currentRow}`).removeClass("btnWait");
             $(`#btnRow${currentRow}`).addClass("btnClickableNext");
             //Help 4
-            setHelpBox(`cell-1-${currentRow}`, "When you're done, press ENTER to update the suggestion");
+            moveHelpBox(`cell-1-${currentRow}`, "When you're done, press ENTER to update the suggestion");
             lettersInput = 0;
         }
     });
@@ -207,7 +207,7 @@ function enterWord() {
         lastClicked = null;
         $(`#btnRow${currentRow}`).addClass("btnWait")
         //Help 3
-        setHelpBox(`cell-1-${currentRow}`, "Now choose the right and wrong letters by clicking on them multiple times.");
+        moveHelpBox(`cell-1-${currentRow}`, "Now choose the right and wrong letters by clicking on them multiple times.");
         //Input Results & Unlock .btnClickableNext
         inputResults()
     }
@@ -224,7 +224,7 @@ function finishRow () {
 
     //Rewrite recomendation
     $("#output").text(currentRec);
-    $("#recBlurb").text(`I'm ${getcertainty()}% sure you should try`);
+    writeCertainty();
 
     //Lock Button
     $(`#btnRow${currentRow}`).removeClass("btnClickableNext");
@@ -239,7 +239,7 @@ function finishRow () {
     }
     selectNextline();
     //Help 5
-    setHelpBox(`cell-1-${currentRow}`, "Enter the word suggested below, or try something else.");
+    moveHelpBox(`cell-1-${currentRow}`, "Enter the word suggested below, or try something else.");
 }
 
 function anotherRec() {
@@ -250,7 +250,7 @@ function anotherRec() {
         //Rewrite recomendation
         $("#output").text(currentRec);
         //Rewrite blurb
-        $("#recBlurb").text(`I'm ${getcertainty()}% sure you should try`);
+        writeCertainty();
 }
 
 function autofillRec(recomendation) {
@@ -266,7 +266,7 @@ function checkRowSelected() {
     if ($(".clickable:empty").length == 0 && $(".btnClickableNext").length == 0 && $(".btnWait").length == 0 ) {
         $(`#btnRow${currentRow}`).addClass("btnClickable");
         //Help 2
-        setHelpBox(`cell-1-${currentRow}`, "Press ENTER to lock in your word");
+        moveHelpBox(`cell-1-${currentRow}`, "Press ENTER to lock in your word");
         return true;
     } else {
         $(`#btnRow${currentRow}`).removeClass("btnClickable");
@@ -291,5 +291,7 @@ function checkBtnClickable () {
     else return false;
 }
 
-
+function highlightCorrectLetters() {
+    
+}
   

@@ -129,7 +129,7 @@ justify-content: center;
 }
 
 .buttonProject h2 {
-  font-size: clamp(calc(min(45vh,50vw)*0,0375),1.4rem,calc(min(45vh,50vw)*0.075));
+  font-size: clamp(min(.90vw,.90vh),1.5rem,min(3.50vw,3.2vh))
 }
 
 a:link { text-decoration: none; }
