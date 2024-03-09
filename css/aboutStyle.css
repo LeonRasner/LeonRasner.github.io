@@ -43,12 +43,9 @@ h4{
   #headshot {
     width: 30%;
     min-height: 400px;
-    background: url(../images/leonrasner.jpg);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
     margin: 0 auto  0 0;
     box-shadow: 16px 16px 0px #3AAD46;
+    object-fit: cover;
   }
   
   #headerAbout {
