@@ -245,7 +245,7 @@ function checkCollision() {
             console.log("speed: " + gameSpeed + " mod: " + gameSpeedMod)
         };
         console.log("speed: " + gameSpeed + " mod: " + gameSpeedMod)
-        gameSpeedMod *= 0.9;
+        gameSpeedMod = Math.max(gameSpeedMod *= 0.9, 0.10);
     }
 }
 
