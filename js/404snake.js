@@ -8,12 +8,15 @@ let tileCount = 30;
 let tileSize = canvas.width / tileCount;
 
 //Game parameters
-var gameRunning = false;
-var gameSpeed = 8; //TODO: Fix Input Lag
-var keyPressed = false;
+let gameRunning = false;
+const initialGameSpeed = 8;
+const initialGameSpeedMod = 1.0;
+let gameSpeed; //TODO: Fix Input Lag
+let gameSpeedMod;
+let keyPressed = false;
 
 //Snake length
-var snakeLength;
+let snakeLength;
 const snakeBits = [];
 
 //Snake Position
@@ -79,8 +82,10 @@ function startGame() {
     document.getElementById("404h2").innerText = "Page Not Found";
     document.getElementById("404h1").innerText = "404";
 
-    //Set variables
+    //Set letiables
     gameRunning = true;
+    gameSpeed = initialGameSpeed;
+    gameSpeedMod = initialGameSpeedMod;
 
     snakeLength = 3;
     snakeBits.length = 0;
@@ -235,7 +240,12 @@ function checkCollision() {
         appleY = Math.floor(Math.random() * tileCount);
         snakeLength++;
         drawScore(snakeLength);
-        if (snakeLength % 3 == 0) gameSpeed++;
+        if (Math.random() < gameSpeedMod) {
+            gameSpeed++;
+            console.log("speed: " + gameSpeed + " mod: " + gameSpeedMod)
+        };
+        console.log("speed: " + gameSpeed + " mod: " + gameSpeedMod)
+        gameSpeedMod *= 0.9;
     }
 }
 
@@ -305,7 +315,7 @@ class snakeBit {
     }
 }
 
-var errors = {
+let errors = {
     404 : "Page Not Found",
     405	: "Method Not Allowed",
     406	: "Not Acceptable",
@@ -337,7 +347,7 @@ var errors = {
     503	: "Service Unavailable",
     504	: "Gateway Timeout",
     505	: "HTTP Version Not Supported",
-    506	: "Variant Also Negotiates",
+    506	: "letiant Also Negotiates",
     507	: "Insufficient Storage",
     508	: "Loop Detected",
     510	: "Not Extended",
