@@ -9,7 +9,7 @@
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 </head>
 
-<div id="gameContainer">
+<div id="gameContainer" style="height: 100vh;">
     <canvas id="sandCanvas" width="900" height="900"></canvas>
     <div id="controlls">
         <button class="btn" id="resetBtn" onclick="emptySandbox()">Reset</button>
@@ -19,7 +19,11 @@
             <button class="btn" id="c0Btn" onclick="setColorMode(0)">C0</button>
             <button class="btn" id="c1Btn" onclick="setColorMode(1)">C1</button>
             <button class="btn" id="c2Btn" onclick="setColorMode(2)">C2</button>
-        </div>  
-
+        </div> 
+        <div>
+            <button class="btn" id="erBtn" onclick="toggleEraser()">del</button>
+        </div> 
+        <label for="sizeRange">Bucket size</label>
+        <input type="range" id="sizeRange" name="SandAmount" min="1" max="30"/>
     </div>
 </div>

@@ -1,39 +1,117 @@
-//Initialize Canvas
-const canvas = document.getElementById('sandCanvas');
-const ctx = canvas.getContext('2d');
-//Initialise Grid
-const grainSize = 10;
-const grainNum = parseInt(canvas.width / grainSize);
-//Sand array
-const sandbox = new Array(grainNum).fill(null).map(() => new Array(grainNum).fill(0));
-//Game variables
-let isrunning = false;
-let gameSpeed = 1000;
-let StabilityMode = false;
-let MagnetismMode = false;
-let stabillity = 3; //How many grains from a settled piece pieces will stick vertically
-let magnetism = 5; //How many grains from a settled piece pieces will move towards
-let colorMode = 0; //0 = static, 1 = gradient, 3 = random
-let color = "#e8b254"; //Current color
 
-//Handle clicking
 let mousedown = false;
 let mouseX;
 let mouseY;
+
+//Initialize Canvas
+const canvas = document.getElementById('sandCanvas');
+let ctx = canvas.getContext("2d", { alpha: false });
+//Initialise Grid
+const grainSize = 10;
+let grainNum = parseInt(canvas.width / grainSize);
+let grainNumV = parseInt(canvas.height / grainSize);
+//Sand array
+let sandbox = new Array(grainNumV).fill(null).map(() => new Array(grainNum).fill(0));
+//Game variables
+let isrunning = false;
+let gameSpeed = 100;
+//Physics variables
+let StabilityMode = false;
+let MagnetismMode = false;
+let stabillity = 30; //How many grains from a settled piece pieces will stick vertically
+let magnetism = 5; //How many grains from a settled piece pieces will move towards
+
+//Draw Variables
+let spawnAmount = 6;
+let eraserMode = false;
+
+//COLOR
+let colorH = 40; // Hue component of color
+let colorS = 81; // Saturation Component
+let colorL = 62; // Lightness Component
+let colorMode = 0; //0 = static, 1 = gradient, 3 = random
+//let shiftSpeed = 1; //by how much the Hue of colorH shifts each shiftGradient in %
+
+function resizeCanvas() {
+    var canvas = document.getElementById('sandCanvas');
+    var container = canvas.parentNode; // Assuming the canvas is wrapped by a div or similar element
+
+    // Set the canvas dimensions to match the container
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+    startGame();
+}
+
+// Adjust canvas size on document load
+document.addEventListener('DOMContentLoaded', resizeCanvas);
+
+
+//Game Loop
+startGame();
+
+function startGame() {
+    isrunning = true;
+
+    grainNum = parseInt(canvas.width / grainSize);
+    grainNumV = parseInt(canvas.height / grainSize);
+    ctx = canvas.getContext("2d", { alpha: false });
+    sandbox = new Array(grainNumV).fill(null).map(() => new Array(grainNum).fill(0));
+
+    clearScreen();
+    emptySandbox();
+    gameLoop();
+    requestAnimationFrame(renderLoop);
+}
+function gameLoop() {
+    checkClick();
+    physics();
+    setTimeout(gameLoop, 1000 / gameSpeed);
+}
+
+function renderLoop() {
+    drawSandbox();
+    requestAnimationFrame(renderLoop);
+}
+
+
+//USER INTERACTION --------------------------------------------------------------------------
 // Store references to event listener functions
 let mouseMoveListener, mouseUpListener;
 
-canvas.addEventListener('mousedown', function (evt) {
-    //Click in canvas -> sand falls
-    mousedown = true;
-    let pos = getMousePos(canvas,evt)
-    mouseX = pos.x;
-    mouseY = pos.y
+function getPositionFromEvent(evt, canvas) {
+    if (evt.touches) {
+        evt = evt.touches[0]; // Get the first touch
+    }
+    return getMousePos(canvas, evt);
+}
 
+function addTouchListeners() {
+    // Add touchmove event listener
+    touchMoveListener = function (e) {
+        e.preventDefault(); // Prevent scrolling and other default actions
+        let pos = getPositionFromEvent(e, canvas);
+        mouseX = pos.x;
+        mouseY = pos.y;
+    };
+    canvas.addEventListener('touchmove', touchMoveListener);
+
+    // Add touchend event listener
+    touchEndListener = function () {
+        mousedown = false;
+
+        // Remove event listeners
+        canvas.removeEventListener('touchmove', touchMoveListener);
+        canvas.removeEventListener('touchend', touchEndListener);
+        canvas.removeEventListener('touchcancel', touchEndListener); // Handle cancellation
+    };
+    canvas.addEventListener('touchend', touchEndListener);
+    canvas.addEventListener('touchcancel', touchEndListener); // Handle cancellation
+}
+
+function addMouseListeners() {
     // Add mousemove event listener
     mouseMoveListener = function (e) {
-        //Mouse moved -> update position
-        let pos = getMousePos(canvas, e);
+        let pos = getPositionFromEvent(e, canvas);
         mouseX = pos.x;
         mouseY = pos.y;
     };
@@ -41,15 +119,34 @@ canvas.addEventListener('mousedown', function (evt) {
 
     // Add mouseup event listener
     mouseUpListener = function () {
-        //Click stopped -> no more sand
         mousedown = false;
 
         // Remove event listeners
         canvas.removeEventListener('mousemove', mouseMoveListener);
         canvas.removeEventListener('mouseup', mouseUpListener);
     };
-    canvas.addEventListener('mouseup', mouseUpListener);
+    document.addEventListener('mouseup', mouseUpListener);
+}
+
+canvas.addEventListener('mousedown', function (evt) {
+    mousedown = true;
+    let pos = getPositionFromEvent(evt, canvas);
+    mouseX = pos.x;
+    mouseY = pos.y;
+
+    addMouseListeners(); // Set up additional mouse event handlers
 });
+
+canvas.addEventListener('touchstart', function (evt) {
+    evt.preventDefault(); // Prevent default actions like scrolling
+    mousedown = true;
+    let pos = getPositionFromEvent(evt, canvas);
+    mouseX = pos.x;
+    mouseY = pos.y;
+
+    addTouchListeners(); // Set up additional touch event handlers
+});
+
 
 function getMousePos(canvas, evt) {
     const rect = canvas.getBoundingClientRect();
@@ -69,28 +166,47 @@ function getArrayIndexForMouse(x, y) {
 function checkClick() {
     if (mousedown) {
         const mouseIndex = getArrayIndexForMouse(mouseY, mouseX);
-        spawnSand(mouseIndex.x, mouseIndex.y, chooseColor());
+        eraserMode ? deleteSand(mouseIndex.x, mouseIndex.y) : spawnSand(mouseIndex.x, mouseIndex.y, chooseColor());
+        
     }
 }
 function spawnSand(x, y, color) {
-    sandbox[x][y] = new Grain(chooseColor(), null);
+    let startX = x - Math.floor(spawnAmount / 2);
+    let startY = y - Math.floor(spawnAmount / 2);
+
+    for (let i = 0; i < spawnAmount; i++) {
+        // Generate random position
+        let nx = startX + Math.floor(Math.random() * spawnAmount);
+        let ny = startY + Math.floor(Math.random() * spawnAmount);
+
+        // Check if coordinates are within array
+        if (nx >= 0 && nx < sandbox.length && ny >= 0 && ny < sandbox[nx].length) {
+            sandbox[nx][ny] = new Grain(color, null);
+        }
+    }
 }
 
-//Game Loop
-startGame();
+function deleteSand(x, y) {
+    let startX = x - Math.floor(spawnAmount / 2);
+    let startY = y - Math.floor(spawnAmount / 2);
+    for (let i = startX; i < x+(spawnAmount/2); i++) {
+        for (let j = startY; j < y+(spawnAmount/2)  ; j++) {
+            debugger
+            // Check if coordinates are within array
+            if (i >= 0 && i < sandbox.length && j >= 0 && j < sandbox[i].length) {
+                sandbox[i][j] = 0;
+            }
+        }
+    }
+}
 
-function startGame() {
-    isrunning = true;
-    clearScreen();
-    emptySandbox();
-    gameLoop();
-}
-function gameLoop() {
-    checkClick();
-    physics();
-    drawSandbox();
-    setTimeout(gameLoop, 1000 / gameSpeed);
-}
+const sizeRange = document.getElementById("sizeRange");
+sizeRange.value = spawnAmount;
+sizeRange.addEventListener("change", () => spawnAmount = parseInt(sizeRange.value));
+
+//------------------------------------------------------------------------
+
+
 
 function clearScreen() {
     ctx.fillStyle = '#ccc';
@@ -99,8 +215,8 @@ function clearScreen() {
 
 //fill sandbox array with 0s
 function emptySandbox() {
-    for (let i = grainNum - 1; i > 0; i--) {
-        for (let j = grainNum - 1; j > 0; j--) {
+    for (let i = grainNumV - 1; i >= 0; i--) {
+        for (let j = grainNum - 1; j >= 0; j--) {
             sandbox[i][j] = 0
         }
     }
@@ -108,31 +224,31 @@ function emptySandbox() {
 
 //draw #000 for 0 and #fff for 1 in sandbox array
 function drawSandbox() {
+    ctx.beginPath();
     for (let i = sandbox.length - 1; i >= 0; i--) {
         for (let j = sandbox[i].length - 1; j >= 0; j--) {
-            if (sandbox[j][i] === 0) {
+            if (sandbox[i][j] === 0) {
                 ctx.fillStyle = '#000';
             } else {
-                ctx.fillStyle = sandbox[j][i].color;
+                ctx.fillStyle = "hsl(" + sandbox[i][j].colorH + ","+colorS+"%,"+colorL+"%)";
             }
-            ctx.beginPath();
-            ctx.rect(i * grainSize, j * grainSize, grainSize, grainSize);
-            ctx.fill();
+            
+            ctx.fillRect(j * grainSize, i * grainSize, grainSize, grainSize);
         }
     }
+    
 }
 
 function chooseColor() {
-    debugger;
     switch (colorMode) {
         case 0:
-            return color;
+            return colorH;
         case 1:
-            return '#' + (Math.floor(Math.random() * 16777215*2)/2).toString(16);
+            return Math.floor(Math.random() * 361); //Random number between 0 and 360
         case 2:
             return shiftGradient();
         default:
-            return color;
+            return colorH;
       }
 }
 
@@ -226,8 +342,8 @@ function physics() {
     }
 }
 
-function Grain(color, settled) {
-    this.color = color; //Color of the grain as a hex value "#0f0"
+function Grain(colorH, settled) {
+    this.colorH = colorH; //Hue component of the Grains color
     this.settled = settled; //0 -> directly above a grain with settled = 0 or the floor, 1 -> 1 grain away (only horicontal!!) ...
 }
 
@@ -239,12 +355,11 @@ function toggleStability() {
     StabilityMode = !StabilityMode;
 }
 
-let colorI = parseInt(color.substring(1), 16); // Starting color in hexadecimal as an integer
-
 function shiftGradient() {
-    colorI = (colorI + 1) % 0xFFFFFF; // Increment and wrap around before reaching 0xFFFFFF
-    let hexStr = colorI.toString(16); // Convert back to a hexadecimal string
-    hexStr = hexStr.padStart(6, '0'); // Ensure the string has at least 6 digits
-    return `#${hexStr}`;
+    colorH = colorH == 361 ? 0 : colorH + 1;
+    return colorH;
 }
 
+function toggleEraser() {
+    eraserMode = !eraserMode;
+}
