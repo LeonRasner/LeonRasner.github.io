@@ -1,3 +1,30 @@
 body {
     background-color: #333;
 }
+
+#gameContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.btn{
+    background-color: #33e;
+    color: #fff;
+    font-size: 1rem;;
+    padding: .5rem;
+    margin: .5rem;
+}
+
+#resetBtn {
+    background-color: #f33;
+    color: #fff;
+}
+#magneticBtn{
+    background-color: #3a3;
+    color: #fff;
+}
+
+#controlls {
+    display: flex;
+    flex-direction: column;
+}

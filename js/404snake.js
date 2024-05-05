@@ -119,7 +119,6 @@ function drawGame() {
     drawApple();
     if (checkGameOver()) {
         endGame(snakeLength);
-        console.warn("Game over");
         return;
     }
     setTimeout(drawGame, 1000 / gameSpeed); //update screen "gameSpeed" times a second
@@ -242,9 +241,7 @@ function checkCollision() {
         drawScore(snakeLength);
         if (Math.random() < gameSpeedMod) {
             gameSpeed++;
-            console.log("speed: " + gameSpeed + " mod: " + gameSpeedMod)
         };
-        console.log("speed: " + gameSpeed + " mod: " + gameSpeedMod)
         gameSpeedMod = Math.max(gameSpeedMod *= 0.9, 0.10);
     }
 }

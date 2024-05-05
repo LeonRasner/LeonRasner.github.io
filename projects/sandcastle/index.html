@@ -9,4 +9,17 @@
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 </head>
 
-<canvas id="sandCanvas" width="900" height="900"></canvas>
+<div id="gameContainer">
+    <canvas id="sandCanvas" width="900" height="900"></canvas>
+    <div id="controlls">
+        <button class="btn" id="resetBtn" onclick="emptySandbox()">Reset</button>
+        <button class="btn" id="magneticBtn" onclick="toogleMagnetism()">Magnetic Sand</button>
+        <button class="btn" id="stickyBtn" onclick="toggleStability()">Sticky Sand</button>
+        <div>
+            <button class="btn" id="c0Btn" onclick="setColorMode(0)">C0</button>
+            <button class="btn" id="c1Btn" onclick="setColorMode(1)">C1</button>
+            <button class="btn" id="c2Btn" onclick="setColorMode(2)">C2</button>
+        </div>  
+
+    </div>
+</div>
