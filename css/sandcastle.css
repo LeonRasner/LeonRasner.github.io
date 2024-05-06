@@ -5,6 +5,9 @@ body {
 #gameContainer {
     display: flex;
     flex-direction: row;
+    width: 98vw;
+    height: 98vh;
+    margin: 1vh 1vw;
 }
 
 .btn{
@@ -25,6 +28,42 @@ body {
 }
 
 #controlls {
+    padding: 1rem;
+    border-radius: 1rem;
+    background-color: #333;
     display: flex;
     flex-direction: column;
+    position: absolute;
+    right: 0;
+    top: 4rem;
+}
+
+
+#sandCanvas {
+    box-shadow: 0 0 0 .5rem rgb(104, 72, 37);
+    width: 100%;
+    height: 100%;
+}
+
+#controlls.hidden{
+    display: none;
+}
+
+@media only screen and (max-width: 800px) {
+    #gameContainer{
+        flex-direction: column;
+    }
+
+    #controlls {
+        padding: 1rem;
+        border-radius: 1rem;
+        background-color: #333;
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        right: unset;
+        left: 0;
+        top: unset;
+        bottom: 2rem;
+    }
 }
