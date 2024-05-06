@@ -84,9 +84,7 @@ $(document).ready(function () {
      
     //Listen for btnAnother
     $("#outputContainer").on('click', '#btnAnother', function (e) {
-    console.log("a")
     if ($(".btnClickableNext").length == 0 && $(".btnWait").length == 0) {
-        console.log("B")
         anotherRec();
         
     }

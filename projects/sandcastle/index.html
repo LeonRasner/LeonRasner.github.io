@@ -1,0 +1,47 @@
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width" name="viewport" user-scalable=0 />
+    <title>Leon's Sandbox</title>
+    <meta name="description" content="Build a Sandcastle">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/sandcastle.css">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="/css/help.css">
+
+</head>
+
+<div id="helpSection">
+    <span id="helpBox">help</span>
+</div>
+
+<div id="gameContainer">
+    <canvas id="sandCanvas" width="900" height="900"></canvas>
+    <div>
+        <button class="btn" id="menuBtn" onclick="toggleControllVisibility()">🛠️</button>
+        <div id="controlls" class="">
+            <button class="btn" id="resetBtn" onclick="emptySandbox()">Clear Sandbox</button>
+            <button class="btn" id="zeroGBtn" onclick="toggleZeroG()">No Gravity</button>
+            <!-- <button class="btn" id="magneticBtn" onclick="toogleMagnetism()">Magnetic Sand</button> -->
+            <button class="btn" id="stickyBtn" onclick="toggleStability()">Sticky Sand</button>
+            <br/>
+            <span>Color mode:</span>
+            <div>
+                <input type="color" id="sandColor" style="opacity: 0; width: 0; margin: 0 -1rem 0 0;" />
+                <button class="btn btnChoice" id="c0Btn" >🎨</button>
+                <button class="btn btnChoice" id="c1Btn" >🎲</button>
+                <button class="btn btnChoice active" id="c2Btn" >🌈</button>
+            </div> 
+            <div>
+                <button class="btn btnChoice" id="erBtn">🧹 erase</button>
+            </div> 
+            <br/>
+            <label for="sizeRange">Bucket size:</label>
+            <input type="range" id="sizeRange" name="SandAmount" min="1" max="30"/>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <script src="/js/sandcastle.js" defer></script>
+    <script src="/js/help.js?v=2"></script>
+</footer>

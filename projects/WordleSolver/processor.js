@@ -82,7 +82,7 @@ function pushWordToBack () {
 }
 
 function writeCertainty() {
-    debugger
+    
     let certainty = getcertainty();
     if (certainty != 0) {
         $("#recBlurb").text(`I'm ${certainty}% sure you should try`);
