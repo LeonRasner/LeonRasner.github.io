@@ -6,20 +6,22 @@ let mouseY;
 let canvas = document.getElementById('sandCanvas');
 let ctx = canvas.getContext("2d", { alpha: false });
 //Initialise Grid
-const grainSize = 5;
+const grainSize = 6;
 let grainNum = parseInt(canvas.width / grainSize);
 let grainNumV = parseInt(canvas.height / grainSize);
 //Sand array
 let sandbox;
 //Game variables
 let isrunning = false;
-let gameSpeed = 70;
+let gameSpeed = 150;
 //Physics variables
 let ZeroGMode = false;
 let StabilityMode = false;
 let MagnetismMode = false;
 let stabillity = 30; //How many grains from a settled piece pieces will stick vertically
 let magnetism = 5; //How many grains from a settled piece pieces will move towards
+//Help (help.js)
+defineHelpBox('helpBox');
 
 //Draw Variables
 let spawnAmount = 6;
@@ -30,7 +32,7 @@ let colorBackground = '#000'
 let colorH = 40; // Hue component of color
 let colorS = 81; // Saturation Component
 let colorL = 62; // Lightness Component
-let colorMode = 0; //0 = static, 1 = gradient, 3 = random
+let colorMode = 2; //0 = static, 1 = gradient, 3 = random
 //let shiftSpeed = 1; //by how much the Hue of colorH shifts each shiftGradient in %
 
 function resizeCanvas() {
@@ -44,7 +46,7 @@ function resizeCanvas() {
 
     let width = container.clientWidth * ratio;
     let height = container.clientHeight * ratio;
-  
+
     width = Math.min(width, maxWidth);
     height = Math.min(height, maxHeight);
 
@@ -56,18 +58,24 @@ function resizeCanvas() {
 // Adjust canvas size on document load and resize
 document.addEventListener('DOMContentLoaded', resizeCanvas);
 
-function loadingAnimation () {
+function loadingAnimation() {
     ZeroGMode = true;
     prepCanvas();
     loadAndProcessImage(canvas, ctx, true)
-    canvas.addEventListener("touchend",userstart);
-    canvas.addEventListener("click",userstart);
+    canvas.addEventListener("touchend", userstart);
+    canvas.addEventListener("click", userstart);
+    setPickerColor(colorH,colorS,colorL);
 }
 
 function userstart() {
-    canvas.removeEventListener("touchend",userstart);
-    canvas.removeEventListener("click",userstart);
+    canvas.removeEventListener("touchend", userstart);
+    canvas.removeEventListener("click", userstart);
     startGame()
+    //Show Initial help
+    moveHelpBox("menuBtn", "Click here for fun options");
+    setTimeout(() => {
+        hideHelpBox()
+    }, 6000);
 }
 
 function prepCanvas() {
@@ -85,7 +93,7 @@ function startGame() {
     ZeroGMode = false;
     setTimeout(() => {
         gameSpeed = 150;
-    }, 2000);
+    }, 1000);
 
     gameLoop();
     requestAnimationFrame(renderLoop);
@@ -195,7 +203,7 @@ function checkClick() {
     if (mousedown) {
         const mouseIndex = getArrayIndexForMouse(mouseY, mouseX);
         eraserMode ? deleteSand(mouseIndex.x, mouseIndex.y, false) : spawnSand(mouseIndex.x, mouseIndex.y, chooseColor());
-        setPickerColor(colorH,colorS,colorL);
+        setPickerColor(colorH, colorS, colorL);
     }
 }
 function spawnSand(x, y, color) {
@@ -214,10 +222,10 @@ function spawnSand(x, y, color) {
     }
 }
 
-function deleteSand(x, y,deletefast) {
+function deleteSand(x, y, deletefast) {
     let startX = x - Math.floor(spawnAmount / 2);
     let startY = y - Math.floor(spawnAmount / 2);
-    if(deletefast) {
+    if (deletefast) {
         for (let i = startX; i < x + (spawnAmount / 2); i++) {
             for (let j = startY; j < y + (spawnAmount / 2); j++) {
                 // Check if coordinates are within array
@@ -231,7 +239,7 @@ function deleteSand(x, y,deletefast) {
             // Generate random position
             let nx = startX + Math.floor(Math.random() * spawnAmount);
             let ny = startY + Math.floor(Math.random() * spawnAmount);
-    
+
             // Check if coordinates are within array
             if (nx >= 0 && nx < sandbox.length && ny >= 0 && ny < sandbox[nx].length) {
                 sandbox[nx][ny] = 1;
@@ -389,7 +397,7 @@ function physics() {
     }
 }
 
-function Grain(colorH,colorS,colorL,settled, changed) {
+function Grain(colorH, colorS, colorL, settled, changed) {
     this.colorH = colorH; //Hue component of the Grains color
     this.colorS = colorS; //Saturation
     this.colorL = colorL; //Lightness
@@ -398,9 +406,10 @@ function Grain(colorH,colorS,colorL,settled, changed) {
 }
 
 const colorPicker = document.getElementById("sandColor");
+const c0Btn = document.getElementById("c0Btn");
 colorPicker.addEventListener("input", x => changColorFromPicker(colorPicker.value));
 
-function changColorFromPicker (hexColor) {
+function changColorFromPicker(hexColor) {
     let [r, g, b] = hexToRgb(hexColor);
     let [h, s, l] = rgbToHsl(r, g, b);
     colorH = h;
@@ -408,12 +417,15 @@ function changColorFromPicker (hexColor) {
     colorL = l;
 }
 
-function setPickerColor(h,s,l) {
-    let rgb = hslToRgb(h,s,l)
-    colorPicker.value = rgbToHex(rgb[0],rgb[1],rgb[2]);
+function setPickerColor(h, s, l) {
+    let rgb = hslToRgb(h, s, l)
+    let hex = rgbToHex(rgb[0], rgb[1], rgb[2]);
+    colorPicker.value = hex;
+    c0Btn.style.background = hex;
+
 }
 
-function hslToRgb(h, s, l){
+function hslToRgb(h, s, l) {
     s /= 100;
     l /= 100;
     let c = (1 - Math.abs(2 * l - 1)) * s;
@@ -424,7 +436,7 @@ function hslToRgb(h, s, l){
     let b = 0;
 
     if (0 <= h && h < 60) {
-        r = c; g = x; b = 0;  
+        r = c; g = x; b = 0;
     } else if (60 <= h && h < 120) {
         r = x; g = c; b = 0;
     } else if (120 <= h && h < 180) {
@@ -468,12 +480,12 @@ function rgbToHsl(r, g, b) {
     let max = Math.max(r, g, b), min = Math.min(r, g, b);
     let h, s, l = (max + min) / 2;
 
-    if(max == min){
+    if (max == min) {
         h = s = 0; // achromatic
     } else {
         let d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch(max){
+        switch (max) {
             case r: h = (g - b) / d + (g < b ? 6 : 0); break;
             case g: h = (b - r) / d + 2; break;
             case b: h = (r - g) / d + 4; break;
@@ -489,11 +501,21 @@ function toogleMagnetism() {
 }
 
 function toggleStability() {
+    if (StabilityMode) {
+        document.getElementById("stickyBtn").classList.remove("active")
+    } else{
+        document.getElementById("stickyBtn").classList.add("active")
+    }
     StabilityMode = !StabilityMode;
 }
 
+let gradientCnt = 0
 function shiftGradient() {
-    colorH = colorH == 361 ? 0 : colorH + 1;
+    if (gradientCnt == 2) {
+        colorH = colorH == 361 ? 0 : colorH + 1;
+        gradientCnt = 0;
+    }
+    gradientCnt++;
     return colorH;
 }
 
@@ -502,23 +524,33 @@ function toggleEraser() {
 }
 
 function toggleZeroG() {
+    if (ZeroGMode) {
+        // document.getElementById("zeroGBtn").innerHTML = "👩‍🚀"
+        document.getElementById("zeroGBtn").classList.remove("active")
+    } else{
+        // document.getElementById("zeroGBtn").innerHTML = "🌍"
+        document.getElementById("zeroGBtn").classList.add("active")
+    }
     ZeroGMode = !ZeroGMode;
 }
 
 const controlls = document.getElementById("controlls");
+const menuBtn = document.getElementById("menuBtn");
 
 function toggleControllVisibility() {
     if (controlls.classList.contains("hidden")) {
         controlls.classList.remove("hidden");
+        menuBtn.innerHTML = "❌"
     } else {
         controlls.classList.add("hidden");
+        menuBtn.innerHTML = "🛠️"
     }
 }
 
 
 function loadAndProcessImage(canvas, ctx, keepAspect) {
     const image = new Image();
-    image.src = '/images/sandbox.png'; // Path to your image
+    image.src = '/images/sandbox2.png'; // Path to your image
     image.onload = () => {
         emptySandbox();
         drawSandbox();
@@ -550,10 +582,49 @@ function processImage(ctx, width, height) {
 
             if (r == null || r < 50 && b < 50 && g < 50) {
                 sandbox[i][j] = 1;
-            } else {55
+            } else {
+                55
                 const hsl = rgbToHsl(r, g, b);
-                sandbox[i][j] = new Grain(hsl[0],hsl[1],hsl[2], null, true);
+                sandbox[i][j] = new Grain(hsl[0], hsl[1], hsl[2], null, true);
             }
         }
     }
+    drawSandbox();
 }
+
+
+let choiceBtns = document.getElementsByClassName("btnChoice");
+
+for (var i = 0; i < choiceBtns.length; i++) {
+    choiceBtns[i].addEventListener('click', x => choiceBtnClick(x), false);
+}
+function choiceBtnClick(x) {
+    if (!x.target.classList.contains("active")) {
+        for (var i = 0; i < choiceBtns.length; i++) {
+            if (choiceBtns[i].classList.contains("active")) {
+                choiceBtns[i].classList.remove("active");
+                x.target.classList.add("active");
+                switch (x.target.id) {
+                    case "c0Btn":
+                        colorMode = 0;
+                        eraserMode = false;
+                        document.getElementById("sandColor").click();
+                        break;
+                    case "c1Btn":
+                        colorMode = 1;
+                        eraserMode = false;
+                        break;
+                    case "c2Btn":
+                        colorMode = 2;
+                        eraserMode = false;
+                        break;
+                    case "erBtn":
+                        eraserMode = true;
+                        break;
+                    default:
+                        break
+                }
+            }
+        }
+    }
+} 
