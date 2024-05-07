@@ -13,12 +13,13 @@ let grainNumV = parseInt(canvas.height / grainSize);
 let sandbox;
 //Game variables
 let isrunning = false;
-let gameSpeed = 150;
+let gameSpeed = 200;
 //Physics variables
 let ZeroGMode = false;
-let StabilityMode = false;
+let veryStickyMode = false;
 let MagnetismMode = false;
 let stabillity = 30; //How many grains from a settled piece pieces will stick vertically
+let stickyMode = false;
 let magnetism = 5; //How many grains from a settled piece pieces will move towards
 //Help (help.js)
 defineHelpBox('helpBox');
@@ -62,9 +63,12 @@ function loadingAnimation() {
     ZeroGMode = true;
     prepCanvas();
     loadAndProcessImage(canvas, ctx, true)
-    canvas.addEventListener("touchend", userstart);
-    canvas.addEventListener("click", userstart);
+    canvas.addEventListener("touchstart", userstart);
+    canvas.addEventListener("mousedown", userstart);
     setPickerColor(colorH,colorS,colorL);
+    setTimeout(() => {
+        if (!isrunning) moveHelpBox("helpAnchorStart", "Click and hold to start pouring sand");
+    }, 5000);
 }
 
 function userstart() {
@@ -91,9 +95,6 @@ function prepCanvas() {
 function startGame() {
     isrunning = true;
     ZeroGMode = false;
-    setTimeout(() => {
-        gameSpeed = 150;
-    }, 1000);
 
     gameLoop();
     requestAnimationFrame(renderLoop);
@@ -347,52 +348,91 @@ function physics() {
     //     }
     // }
     //Gravity -----------
+    let direction = false;
     for (let i = sandbox.length - 1; i >= 0; i--) {
-        for (let j = sandbox[i].length - 1; j >= 0; j--) {
-            if (sandbox[i][j] !== 0 && sandbox[i][j] !== 1) {
-                //Check for every grain
-                if (i < sandbox.length - 1) {
-                    //Not floor row
-                    if (sandbox[i + 1][j] === 0 || sandbox[i + 1][j] === 1) {
-                        //Zero G --------------------
-                        if (ZeroGMode) {
+        if (direction) {
+            direction = false
+            for (let j = sandbox[i].length - 1; j >= 0; j--) { 
+                gravity(i,j);
+            }
+        } else {
+            direction = true
+            for (let j = 0 ; j < sandbox[i].length; j++) {
+                gravity(i,j);
+            }
+        }
+    }
+}
 
-                        }
-                        //Stabillity ----------------
-                        else if (StabilityMode) {
-                            let leftEdge = j == 0;
-                            let rightEdge = j == sandbox[i].length - 1;
-                            if (!leftEdge && sandbox[i][j - 1] != 0 && sandbox[i][j - 1].settled != null && sandbox[i][j - 1].settled < stabillity) {
-                                //settled piece to left
-                                sandbox[i][j].settled = sandbox[i][j - 1].settled + 1;
-                            } else if (!rightEdge && sandbox[i][j + 1] != 0 && sandbox[i][j + 1].settled != null && sandbox[i][j + 1].settled < stabillity) {
-                                //settled piece to right
-                                sandbox[i][j].settled = sandbox[i][j + 1].settled + 1;
-                            } else {
-                                //No settled piece left or right -> move down
-                                sandbox[i][j].changed = true;
-                                sandbox[i + 1][j] = sandbox[i][j];
-                                sandbox[i][j] = 1;
-                                sandbox[i][j].changed = true;
-                            }
-                        } else {
-                            //Stabillity mode disable -> move down
-                            sandbox[i][j].changed = true;
-                            sandbox[i + 1][j] = sandbox[i][j];
-                            sandbox[i][j] = 1;
-                            sandbox[i][j].changed = true;
-                        }
+function gravity(i,j) {
+    if (sandbox[i][j] !== 0 && sandbox[i][j] !== 1) {
+        //Check for every grain
+        if (i < sandbox.length - 1) {
+            //Not floor row
+            if (sandbox[i + 1][j] === 0 || sandbox[i + 1][j] === 1) {
+                //Zero G --------------------
+                if (ZeroGMode) {
 
+                }
+                //Stabillity ----------------
+                else if (veryStickyMode) {
+                    let leftEdge = j == 0;
+                    let rightEdge = j == sandbox[i].length - 1;
+                    if (!leftEdge && sandbox[i][j - 1] != 0 && sandbox[i][j - 1].settled != null && sandbox[i][j - 1].settled < stabillity) {
+                        //settled piece to left
+                        sandbox[i][j].settled = sandbox[i][j - 1].settled + 1;
+                    } else if (!rightEdge && sandbox[i][j + 1] != 0 && sandbox[i][j + 1].settled != null && sandbox[i][j + 1].settled < stabillity) {
+                        //settled piece to right
+                        sandbox[i][j].settled = sandbox[i][j + 1].settled + 1;
                     } else {
-                        //sits on top of settled piece -> settled == piece below
+                        //No settled piece left or right -> move down
+                        sandbox[i][j].changed = true;
+                        sandbox[i + 1][j] = sandbox[i][j];
+                        sandbox[i][j] = 1;
+                        sandbox[i][j].changed = true;
+                    }
+                } else {
+                    //Stabillity mode disable -> move down
+                    sandbox[i][j].changed = true;
+                    sandbox[i + 1][j] = sandbox[i][j];
+                    sandbox[i][j] = 1;
+                }
+
+            } else {
+                //sits on top of settled piece -> settled == piece below
+                if (!stickyMode && !ZeroGMode) {
+                    let leftFree = j >= 0 && (sandbox[i+1][j-1] === 0 || sandbox[i+1][j-1] === 1);
+                    let rightFree = j <= sandbox[i].length && (sandbox[i+1][j+1] === 0 || sandbox[i+1][j+1] === 1);
+                    if(leftFree && rightFree) {
+                        //Move in random direction down
+                        if (Math.random > .499) {
+                            sandbox[i][j].changed = true;
+                            sandbox[i + 1][j + 1] = sandbox[i][j];
+                            sandbox[i][j] = 1;
+                        } else {
+                            sandbox[i][j].changed = true;
+                            sandbox[i + 1][j - 1] = sandbox[i][j];
+                            sandbox[i][j] = 1;
+                        }
+                    } else if (leftFree) {
+                        sandbox[i][j].changed = true;
+                        sandbox[i + 1][j - 1] = sandbox[i][j];
+                        sandbox[i][j] = 1;
+                    } else if (rightFree) {
+                        sandbox[i][j].changed = true;
+                        sandbox[i + 1][j + 1] = sandbox[i][j];
+                        sandbox[i][j] = 1;
+                    } else {
                         sandbox[i][j].settled = sandbox[i + 1][j].settled;
                     }
                 } else {
-                    //sits on floor -> settled = 0
-                    sandbox[i][j].settled = 0;
-                    sandbox[i][j].changed = true;
+                    sandbox[i][j].settled = sandbox[i + 1][j].settled;
                 }
             }
+        } else {
+            //sits on floor -> settled = 0
+            sandbox[i][j].settled = 0;
+            sandbox[i][j].changed = true;
         }
     }
 }
@@ -500,13 +540,37 @@ function toogleMagnetism() {
     MagnetismMode = !MagnetismMode;
 }
 
-function toggleStability() {
-    if (StabilityMode) {
-        document.getElementById("stickyBtn").classList.remove("active")
-    } else{
-        document.getElementById("stickyBtn").classList.add("active")
+function toggleStability(a) {
+    if (a == 0) {
+            document.getElementById("stickyBtn").classList.remove("active");
+            document.getElementById("veryStickyBtn").classList.remove("active");
+            stickyMode = false
+            veryStickyMode = false;
+    } else if (a == 1) {
+        if (veryStickyMode || !stickyMode) {
+            document.getElementById("stickyBtn").classList.add("active");
+            document.getElementById("veryStickyBtn").classList.remove("active");
+            stickyMode = true;
+            veryStickyMode = false;
+        } else if (stickyMode) {
+            document.getElementById("stickyBtn").classList.remove("active");
+            document.getElementById("veryStickyBtn").classList.remove("active");
+            stickyMode = false
+            veryStickyMode = false;
+        }
+    } else {
+        if (veryStickyMode) {
+            document.getElementById("veryStickyBtn").classList.remove("active");
+            document.getElementById("stickyBtn").classList.remove("active");
+            veryStickyMode = false;
+            stickyMode = false;
+        } else{
+            document.getElementById("veryStickyBtn").classList.add("active");
+            document.getElementById("stickyBtn").classList.remove("active");
+            veryStickyMode = true;
+            stickyMode = true;
+        }
     }
-    StabilityMode = !StabilityMode;
 }
 
 let gradientCnt = 0
@@ -528,7 +592,7 @@ function toggleZeroG() {
         // document.getElementById("zeroGBtn").innerHTML = "👩‍🚀"
         document.getElementById("zeroGBtn").classList.remove("active")
     } else{
-        // document.getElementById("zeroGBtn").innerHTML = "🌍"
+        // document.getElementById("zeroGBtn").innerHTML = "🌍" 	        
         document.getElementById("zeroGBtn").classList.add("active")
     }
     ZeroGMode = !ZeroGMode;
@@ -547,23 +611,70 @@ function toggleControllVisibility() {
     }
 }
 
+let choiceBtns = document.getElementsByClassName("btnChoice");
+
+for (var i = 0; i < choiceBtns.length; i++) {
+    choiceBtns[i].addEventListener('click', x => choiceBtnClick(x), false);
+}
+
+function choiceBtnClick(x) {
+    if (!x.target.classList.contains("active")) {
+        for (var i = 0; i < choiceBtns.length; i++) {
+            if (choiceBtns[i].classList.contains("active")) {
+                choiceBtns[i].classList.remove("active");
+                x.target.classList.add("active");
+                switch (x.target.id) {
+                    case "c0Btn":
+                        colorMode = 0;
+                        eraserMode = false;
+                        document.getElementById("sandColor").click();
+                        break;
+                    case "c1Btn":
+                        colorMode = 1;
+                        eraserMode = false;
+                        break;
+                    case "c2Btn":
+                        colorMode = 2;
+                        eraserMode = false;
+                        break;
+                    case "erBtn":
+                        eraserMode = true;
+                        break;
+                    default:
+                        break
+                }
+            }
+        }
+    } else if (x.target.id == "c0Btn") {
+        document.getElementById("sandColor").click();
+    }
+}
+
+
+// IMAGE PROCESSING ---------------------------------------------------------------------
+
 
 function loadAndProcessImage(canvas, ctx, keepAspect) {
     const image = new Image();
     image.src = '/images/sandbox2.png'; // Path to your image
     image.onload = () => {
-        emptySandbox();
-        drawSandbox();
-        if (keepAspect) {
-            let a = Math.min(canvas.width, canvas.height)
-            let offx = (canvas.width - a) / 2;
-            let offy = (canvas.height - a) / 2;
-            ctx.drawImage(image, offx, offy, a, a);
-        } else {
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-        }
-        processImage(ctx, canvas.width, canvas.height);
+        prepImage(image, ctx, keepAspect);
     };
+}
+
+
+function prepImage(image, ctx, keepAspect) {
+    emptySandbox();
+    drawSandbox();
+    if (keepAspect) {
+        let a = Math.min(canvas.width, canvas.height)
+        let offx = (canvas.width - a) / 2;
+        let offy = (canvas.height - a) / 2;
+        ctx.drawImage(image, offx, offy, a, a);
+    } else {
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    }
+    processImage(ctx, canvas.width, canvas.height);
 }
 
 
@@ -593,38 +704,29 @@ function processImage(ctx, width, height) {
 }
 
 
-let choiceBtns = document.getElementsByClassName("btnChoice");
+document.getElementById('imageInput').addEventListener('change', function(event) {
+    debugger
+    if (event.target.files && event.target.files[0]) {
+        const file = event.target.files[0];
 
-for (var i = 0; i < choiceBtns.length; i++) {
-    choiceBtns[i].addEventListener('click', x => choiceBtnClick(x), false);
-}
-function choiceBtnClick(x) {
-    if (!x.target.classList.contains("active")) {
-        for (var i = 0; i < choiceBtns.length; i++) {
-            if (choiceBtns[i].classList.contains("active")) {
-                choiceBtns[i].classList.remove("active");
-                x.target.classList.add("active");
-                switch (x.target.id) {
-                    case "c0Btn":
-                        colorMode = 0;
-                        eraserMode = false;
-                        document.getElementById("sandColor").click();
-                        break;
-                    case "c1Btn":
-                        colorMode = 1;
-                        eraserMode = false;
-                        break;
-                    case "c2Btn":
-                        colorMode = 2;
-                        eraserMode = false;
-                        break;
-                    case "erBtn":
-                        eraserMode = true;
-                        break;
-                    default:
-                        break
-                }
-            }
+        // Ensure it's an image
+        if (file.type.match('image.*')) {
+            const reader = new FileReader();
+
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    prepImage(img, ctx, true);
+                };
+                
+                img.src = evt.target.result; // Set image source to data URL
+                canvas.style.display = 'block'; // Show canvas
+            };
+
+            // Read the file as Data URL
+            reader.readAsDataURL(file);
+        } else {
+            console.error('File is not an image.');
         }
     }
-} 
+});

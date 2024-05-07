@@ -11,32 +11,43 @@
 </head>
 
 <div id="helpSection">
-    <span id="helpBox">help</span>
+    <span id="helpBox"></span>
 </div>
 
 <div id="gameContainer">
+    <span id="helpAnchorStart" style="opacity: 0; height: 0; width: 0; position: absolute; right: 40vw; top: 10vh;"></span>
     <canvas id="sandCanvas" width="900" height="900"></canvas>
     <div>
         <button class="btn" id="menuBtn" onclick="toggleControllVisibility()">🛠️</button>
         <div id="controlls" class="hidden">
             <button class="btn" id="resetBtn" onclick="emptySandbox()">Clear Sandbox</button>
-            <button class="btn" id="zeroGBtn" onclick="toggleZeroG()">No Gravity</button>
-            <!-- <button class="btn" id="magneticBtn" onclick="toogleMagnetism()">Magnetic Sand</button> -->
-            <button class="btn" id="stickyBtn" onclick="toggleStability()">Sticky Sand</button>
             <br/>
-            <span>Color mode:</span>
-            <div>
+            <label >Physics options:</label>
+            <button class="btn" id="zeroGBtn" onclick="toggleZeroG()" title="Make sand stop in midair">No Gravity</button>
+            <!-- <button class="btn" id="magneticBtn" onclick="toogleMagnetism()">Magnetic Sand</button> -->
+            <button class="btn" id="normalBtn" onclick="toggleStability(0)" title="Make sand pile up">Normal Sand</button>
+            <button class="btn" id="stickyBtn" onclick="toggleStability(1)" title="Make sand form towers">Sticky Sand</button>
+            <button class="btn" id="veryStickyBtn" onclick="toggleStability(2)" title="Make sand stick together">Very sticky Sand</button>
+            <br/>
+            <label for="colorsDiv">Color mode:</label>
+            <div id="colorsDiv">
                 <input type="color" id="sandColor" style="opacity: 0; width: 0; margin: 0 -1rem 0 0;" />
-                <button class="btn btnChoice" id="c0Btn" >🎨</button>
-                <button class="btn btnChoice" id="c1Btn" >🎲</button>
-                <button class="btn btnChoice active" id="c2Btn" >🌈</button>
+                <button class="btn btnChoice" id="c0Btn" title="Choose single sand color"><span>🎨</span></button>
+                <button class="btn btnChoice" id="c1Btn" title="Sand will be colored randomly"><span>🎲</span></button>
+                <button class="btn btnChoice active" id="c2Btn" title="Sand will change color slowly"><span>🌈</span></button>
             </div> 
             <div>
-                <button class="btn btnChoice" id="erBtn">🧹 erase</button>
+                <button class="btn btnChoice" id="erBtn" title="Delete sand by clicking"><span>🧹</span> Eraser</button>
             </div> 
             <br/>
             <label for="sizeRange">Bucket size:</label>
             <input type="range" id="sizeRange" name="SandAmount" min="1" max="30"/>
+            <br>
+            <label for="imageInput">Image to sand:</label>
+            <label for="imageInput" id="customFileUpload">
+                <span>📁</span> Choose file
+            </label>
+            <input type="file" id="imageInput" accept=".png,.jpg">
         </div>
     </div>
 </div>
