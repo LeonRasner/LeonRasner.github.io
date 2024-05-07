@@ -11,7 +11,7 @@ body {
 }
 
 .btn{
-    background-color: #33e;
+    background-color: rgb(123, 123, 198);
     color: #fff;
     font-size: 1rem;;
     padding: .5rem;
@@ -24,6 +24,10 @@ body {
 
 .btn > span {
     font-size: 1.5rem;
+}
+
+label > span {
+    font-size: 1.3rem;
 }
 
 input{
@@ -46,10 +50,17 @@ input{
     top: .3rem;
     padding: .2rem;
     font-size: 2rem;
+    border: solid .2rem #fff;
 }
 
 #resetBtn {
     background-color: #f33;
+    color: #fff;
+}
+
+
+#zeroGBtn {
+    background-color: rgb(0, 0, 0);
     color: #fff;
 }
 
@@ -104,6 +115,22 @@ input{
     display: none;
 }
 
+input[type="file"] {
+    display: none;
+}
+
+#customFileUpload{
+    background-color: rgb(123, 123, 198);
+    color: #fff;
+    font-size: 1rem;;
+    padding: .5rem;
+    margin: .5rem 1rem .5rem 0;
+    font-family: "Press Start 2P", monospace;
+    font-size: 1rem;
+    text-shadow: 0 0 .2rem #000;
+    cursor: pointer;
+}
+
 @media only screen and (max-width: 800px) {
     #gameContainer{
         flex-direction: column;
@@ -122,3 +149,4 @@ input{
         bottom: 2rem;
     } */
 }
+
