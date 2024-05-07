@@ -67,11 +67,12 @@ function loadingAnimation() {
     canvas.addEventListener("mousedown", userstart);
     setPickerColor(colorH,colorS,colorL);
     setTimeout(() => {
-        if (!isrunning) moveHelpBox("helpAnchorStart", "Click and hold to start pouring sand");
-    }, 5000);
+        if (!isrunning) centerHelpBox("Click and hold to start pouring sand");
+    }, 6000);
 }
 
 function userstart() {
+    hideHelpBox()
     canvas.removeEventListener("touchstart", userstart);
     canvas.removeEventListener("mousedown", userstart);
     startGame()
@@ -256,7 +257,7 @@ sizeRange.addEventListener("change", () => spawnAmount = parseInt(sizeRange.valu
 //------------------------------------------------------------------------
 
 function clearScreen() {
-    ctx.fillStyle = '#ccc';
+    ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
@@ -656,7 +657,7 @@ function choiceBtnClick(x) {
 
 function loadAndProcessImage(canvas, ctx, keepAspect) {
     const image = new Image();
-    image.src = '/images/sandbox2.png'; // Path to your image
+    image.src = '/images/sandbox.png'; // Path to your image
     image.onload = () => {
         prepImage(image, ctx, keepAspect);
     };
@@ -672,7 +673,36 @@ function prepImage(image, ctx, keepAspect) {
         let offy = (canvas.height - a) / 2;
         ctx.drawImage(image, offx, offy, a, a);
     } else {
-        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        let canvasWidth = canvas.width;
+        let canvasHeight = canvas.height;
+        let canvasRatio = canvasWidth / canvasHeight;
+        
+        let width = image.naturalWidth;
+        let height = image.naturalHeight;
+        let imageRatio = width / height;
+        
+        let drawWidth, drawHeight, offsetX, offsetY;
+        
+        // Determine how to scale the image
+        if (imageRatio < canvasRatio) {
+            // Image ratio is narrower than canvas ratio
+            // Fit to height and adjust width
+            drawHeight = canvasHeight;
+            drawWidth = canvasHeight * imageRatio;
+            offsetX = (canvasWidth - drawWidth) / 2;  // Center horizontally
+            offsetY = 0;  // Align top
+        } else {
+            // Image ratio is wider than canvas ratio
+            // Fit to width and adjust height
+            drawWidth = canvasWidth;
+            drawHeight = canvasWidth / imageRatio;
+            offsetX = 0;  // Align left
+            offsetY = (canvasHeight - drawHeight) / 2;  // Center vertically
+        }
+
+        // Draw the image scaled to fit within the canvas and centered
+        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+        
     }
     processImage(ctx, canvas.width, canvas.height);
 }
@@ -705,7 +735,6 @@ function processImage(ctx, width, height) {
 
 
 document.getElementById('imageInput').addEventListener('change', function(event) {
-    debugger
     if (event.target.files && event.target.files[0]) {
         const file = event.target.files[0];
 
@@ -716,7 +745,7 @@ document.getElementById('imageInput').addEventListener('change', function(event)
             reader.onload = function(evt) {
                 const img = new Image();
                 img.onload = function() {
-                    prepImage(img, ctx, true);
+                    prepImage(img, ctx, false);
                 };
                 
                 img.src = evt.target.result; // Set image source to data URL
@@ -730,3 +759,21 @@ document.getElementById('imageInput').addEventListener('change', function(event)
         }
     }
 });
+
+document.getElementById('downloadCanvas').addEventListener('click', x => saveCanvasAsPNG()
+);
+
+function saveCanvasAsPNG() {
+    let canvas = document.getElementById('sandCanvas');
+    let dataURL = canvas.toDataURL('image/png');
+
+    // Create a new anchor element dynamically
+    let downloadLink = document.createElement('a');
+    downloadLink.href = dataURL;
+    downloadLink.download = 'my_sandbox.png';
+
+    // Trigger the download by simulating a click
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
