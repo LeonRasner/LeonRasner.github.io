@@ -13,7 +13,7 @@ let grainNumV = parseInt(canvas.height / grainSize);
 let sandbox;
 //Game variables
 let isrunning = false;
-let gameSpeed = 200;
+let gameSpeed = 150;
 //Physics variables
 let ZeroGMode = false;
 let veryStickyMode = false;
@@ -72,8 +72,8 @@ function loadingAnimation() {
 }
 
 function userstart() {
-    canvas.removeEventListener("touchend", userstart);
-    canvas.removeEventListener("click", userstart);
+    canvas.removeEventListener("touchstart", userstart);
+    canvas.removeEventListener("mousedown", userstart);
     startGame()
     //Show Initial help
     moveHelpBox("menuBtn", "Click here for fun options");
