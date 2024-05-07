@@ -619,16 +619,15 @@ for (var i = 0; i < choiceBtns.length; i++) {
 }
 
 function choiceBtnClick(x) {
-    if (!x.target.classList.contains("active")) {
+    let targetBtn = x.currentTarget
         for (var i = 0; i < choiceBtns.length; i++) {
             if (choiceBtns[i].classList.contains("active")) {
                 choiceBtns[i].classList.remove("active");
-                x.target.classList.add("active");
-                switch (x.target.id) {
+                targetBtn.classList.add("active");
+                switch (targetBtn.id) {
                     case "c0Btn":
                         colorMode = 0;
                         eraserMode = false;
-                        document.getElementById("sandColor").click();
                         break;
                     case "c1Btn":
                         colorMode = 1;
@@ -646,9 +645,6 @@ function choiceBtnClick(x) {
                 }
             }
         }
-    } else if (x.target.id == "c0Btn") {
-        document.getElementById("sandColor").click();
-    }
 }
 
 

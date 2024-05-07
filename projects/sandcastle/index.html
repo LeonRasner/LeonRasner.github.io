@@ -30,8 +30,12 @@
             <br/>
             <label for="colorsDiv">Color mode:</label>
             <div id="colorsDiv">
-                <input type="color" id="sandColor" style="opacity: 0; width: 0; margin: 0 -1rem 0 0;" />
-                <button class="btn btnChoice" id="c0Btn" title="Choose single sand color"><span>🎨</span></button>
+                <input type="color" id="sandColor" style="opacity: 0; width: 0; margin: 0 -1rem 0 0;" >
+                <label for="sandColor" id="x-icon" title="Upload a image and turn it to sand. (Black will become empty space)" style="display: inline-block; width: fit-content;">
+                    <div class="btn btnChoice" id="c0Btn" style="width: fit-content">
+                        <span>🎨</span>
+                    </div>    
+                </label>
                 <button class="btn btnChoice" id="c1Btn" title="Sand will be colored randomly"><span>🎲</span></button>
                 <button class="btn btnChoice active" id="c2Btn" title="Sand will change color slowly"><span>🌈</span></button>
             </div> 
@@ -47,6 +51,7 @@
                 <span>📁</span> Choose file
             </label>
             <input type="file" id="imageInput" accept=".png,.jpg">
+
             <label for="downloadCanvas">Save sandbox as png:</label>
             <label id="downloadCanvas" class="fakeButton" title="Save canvas as PNG image (can be loaded again later)">
                 <span>💾</span> Download
