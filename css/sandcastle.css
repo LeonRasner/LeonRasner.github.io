@@ -5,8 +5,8 @@ body {
 #gameContainer {
     display: flex;
     flex-direction: row;
-    width: 98vw;
-    height: 98vh;
+    width: 98%;
+    height: 98%;
     margin: 1vh 1vw;
 }
 
