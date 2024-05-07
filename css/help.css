@@ -42,6 +42,10 @@
     margin-top: -.7rem;
 }
 
+.helpboxNoArrow::after{
+    display: none !important;
+}
+
 
 @media only screen and (max-width: 1200px) {
     #helpBox{
