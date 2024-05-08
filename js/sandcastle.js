@@ -1,47 +1,47 @@
-let mousedown = false;
-let mouseX;
-let mouseY;
+//Leon's Sand Box
 
-//Initialize Canvas
+//INITIAL SETUP ----------------------------------------------------------------------------
+
+//Initialise Canvas
 let canvas = document.getElementById('sandCanvas');
 let ctx = canvas.getContext("2d", { alpha: false });
 //Initialise Grid
-const grainSize = 6;
+let sandbox;
+const grainSize = 6; //Determins "resolution" of sand box. 5 - 30 should work well. Anything below 5 can lead to significant performance losses, over 50 to crashes.
 let grainNum = parseInt(canvas.width / grainSize);
 let grainNumV = parseInt(canvas.height / grainSize);
-//Sand array
-let sandbox;
 //Game variables
 let isrunning = false;
 let gameSpeed = 150;
 //Physics variables
-let ZeroGMode = false;
-let veryStickyMode = false;
-let MagnetismMode = false;
+let ZeroGMode = false; //Disables physics (blocks stay in place) 
+let stickyMode = false; //Grains will only stack verticall and not settle sideways
+let veryStickyMode = false; //Grains will stick together horizontally (up to stabillity limit)
+let MagnetismMode = false; //Magnetic sand (currently not working right)
 let stabillity = 30; //How many grains from a settled piece pieces will stick vertically
-let stickyMode = false;
-let magnetism = 5; //How many grains from a settled piece pieces will move towards
+let magnetism = 2; //How many grains from a settled piece pieces will move towards (Only works with MagnetismMode)
 //Help (help.js)
 defineHelpBox('helpBox');
-
-//Draw Variables
-let spawnAmount = 6;
+//User-Interaction Variables
+let mousedown = false;
+let mouseX;
+let mouseY;
+//Bucket / Eraser Variables
+let spawnAmount = 6; //How much sand is spawned / erased by clicking
 let eraserMode = false;
-
-//COLOR
-let colorBackground = '#000'
+//Color Variables
+let colorBackground = '#000' //Color of empty space
 let colorH = 40; // Hue component of color
 let colorS = 81; // Saturation Component
 let colorL = 62; // Lightness Component
 let colorMode = 2; //0 = static, 1 = gradient, 3 = random
 //let shiftSpeed = 1; //by how much the Hue of colorH shifts each shiftGradient in %
-
 function resizeCanvas() {
     let container = canvas.parentNode; // Assuming the canvas is wrapped by a div or similar element
 
     let maxWidth = 1200;
     let maxHeight = 1200;
-
+    debugger
     // Aspect ratio
     let ratio = Math.min(maxWidth / container.clientWidth, maxHeight / container.clientHeight);
 
@@ -63,8 +63,8 @@ function loadingAnimation() {
     ZeroGMode = true;
     prepCanvas();
     loadAndProcessImage(canvas, ctx, true)
-    canvas.addEventListener("touchstart", userstart);
-    canvas.addEventListener("mousedown", userstart);
+    document.addEventListener("touchstart", userstart);
+    document.addEventListener("mousedown", userstart);
     setPickerColor(colorH,colorS,colorL);
     setTimeout(() => {
         if (!isrunning) centerHelpBox("Click and hold to start pouring sand");
@@ -73,8 +73,8 @@ function loadingAnimation() {
 
 function userstart() {
     hideHelpBox()
-    canvas.removeEventListener("touchstart", userstart);
-    canvas.removeEventListener("mousedown", userstart);
+    document.removeEventListener("touchstart", userstart);
+    document.removeEventListener("mousedown", userstart);
     startGame()
     //Show Initial help
     moveHelpBox("menuBtn", "Click here for fun options");
@@ -307,47 +307,47 @@ function setColorMode(c) {
 
 function physics() {
     //Magnetism ---------------
-    // if (MagnetismMode) {
-    //     for (let i = sandbox.length - 1; i >= 0; i--) {
-    //         for (let j = sandbox[i].length - 1; j >= 0; j--) {
-    //             if (sandbox[i][j] != 0 && sandbox[i][j] != 1 && sandbox[i][j].settled == null) {
-    //                 //Check for every grain
-    //                 if ((j == 0 || sandbox[i][j - 1] == 0 || sandbox[i][j - 1] == 1) && (j == sandbox[i].length - 1 || sandbox[i][j + 1] == 0 || sandbox[i][j + 1] == 1)) {
-    //                     //Direct neighbours are empty -> can move horizontally
-    //                     if (i < sandbox.length - 1) {
-    //                         //Not floor row
-    //                         if (sandbox[i + 1][j] == 0 ||sandbox[i + 1][j] == 1) {
-    //                             //Nothing stable below
-    //                             let minDistance = magnetism;
-    //                             let magnetismDirection;
-    //                             let min = j - magnetism < 0 ? 0 : j - magnetism;
-    //                             let max = j + magnetism >= sandbox[i].length ? sandbox[i].length - 1 : j + magnetism;
-    //                             for (let k = min; k <= max; k++) {
-    //                                 //Chek if stable piece is nearby
-    //                                 if ((k > j + 1 || k < j - 1) && sandbox[i][k] != 0 && sandbox[i][k] != 1 && sandbox[i][k].settled != null && sandbox[i][k].settled < stabillity) {
-    //                                     if (sandbox[i][k].settled < stabillity) {
-    //                                         let distance = Math.abs(k - j);
-    //                                         if (minDistance > distance) {
-    //                                             minDistance = distance;
-    //                                             magnetismDirection = k - j;
-    //                                             magnetismDirection = magnetismDirection < 0 ? magnetismDirection + 1 : magnetismDirection - 1;
-    //                                         }
-    //                                     }
-    //                                 }
-    //                             }
-    //                             if (minDistance != magnetism) {
-    //                                 //neares settled piece in magnetic range -> move next to it
-    //                                 sandbox[i][j].changed = true;
-    //                                 sandbox[i][j + magnetismDirection] = sandbox[i][j];
-    //                                 sandbox[i][j] = 1;
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+    if (MagnetismMode) {
+        for (let i = sandbox.length - 1; i >= 0; i--) {
+            for (let j = sandbox[i].length - 1; j >= 0; j--) {
+                if (sandbox[i][j] != 0 && sandbox[i][j] != 1 && sandbox[i][j].settled == null) {
+                    //Check for every grain
+                    if ((j == 0 || sandbox[i][j - 1] == 0 || sandbox[i][j - 1] == 1) && (j == sandbox[i].length - 1 || sandbox[i][j + 1] == 0 || sandbox[i][j + 1] == 1)) {
+                        //Direct neighbours are empty -> can move horizontally
+                        if (i < sandbox.length - 1) {
+                            //Not floor row
+                            if (sandbox[i + 1][j] == 0 ||sandbox[i + 1][j] == 1) {
+                                //Nothing stable below
+                                let minDistance = magnetism;
+                                let magnetismDirection;
+                                let min = j - magnetism < 0 ? 0 : j - magnetism;
+                                let max = j + magnetism >= sandbox[i].length ? sandbox[i].length - 1 : j + magnetism;
+                                for (let k = min; k <= max; k++) {
+                                    //Chek if stable piece is nearby
+                                    if ((k > j + 1 || k < j - 1) && sandbox[i][k] != 0 && sandbox[i][k] != 1 && sandbox[i][k].settled != null && sandbox[i][k].settled < stabillity) {
+                                        if (sandbox[i][k].settled < stabillity) {
+                                            let distance = Math.abs(k - j);
+                                            if (minDistance > distance) {
+                                                minDistance = distance;
+                                                magnetismDirection = k - j;
+                                                magnetismDirection = magnetismDirection < 0 ? magnetismDirection + 1 : magnetismDirection - 1;
+                                            }
+                                        }
+                                    }
+                                }
+                                if (minDistance != magnetism) {
+                                    //neares settled piece in magnetic range -> move next to it
+                                    sandbox[i][j].changed = true;
+                                    sandbox[i][j + magnetismDirection] = sandbox[i][j];
+                                    sandbox[i][j] = 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     //Gravity -----------
     let direction = false;
     for (let i = sandbox.length - 1; i >= 0; i--) {
@@ -379,19 +379,22 @@ function gravity(i,j) {
                 else if (veryStickyMode) {
                     let leftEdge = j == 0;
                     let rightEdge = j == sandbox[i].length - 1;
-                    if (!leftEdge && sandbox[i][j - 1] != 0 && sandbox[i][j - 1].settled != null && sandbox[i][j - 1].settled < stabillity) {
-                        //settled piece to left
-                        sandbox[i][j].settled = sandbox[i][j - 1].settled + 1;
-                    } else if (!rightEdge && sandbox[i][j + 1] != 0 && sandbox[i][j + 1].settled != null && sandbox[i][j + 1].settled < stabillity) {
-                        //settled piece to right
-                        sandbox[i][j].settled = sandbox[i][j + 1].settled + 1;
-                    } else {
-                        //No settled piece left or right -> move down
-                        sandbox[i][j].changed = true;
-                        sandbox[i + 1][j] = sandbox[i][j];
-                        sandbox[i][j] = 1;
-                        sandbox[i][j].changed = true;
+                    if (sandbox[i][j].settled == null || sandbox[i][j].settled > stabillity) {
+                        if (!leftEdge && sandbox[i][j - 1] != 0 && sandbox[i][j - 1] != 1 && sandbox[i][j - 1].settled != null && sandbox[i][j - 1].settled < stabillity) {
+                            //settled piece to left
+                            sandbox[i][j].settled = sandbox[i][j - 1].settled + 1;
+                        } else if (!rightEdge && sandbox[i][j + 1] != 0 && sandbox[i][j + 1] != 1 && sandbox[i][j + 1].settled != null && sandbox[i][j + 1].settled < stabillity) {
+                            //settled piece to right
+                            sandbox[i][j].settled = sandbox[i][j + 1].settled + 1;
+                        } else {
+                            //No settled piece left or right -> move down
+                            sandbox[i][j].changed = true;
+                            sandbox[i + 1][j] = sandbox[i][j];
+                            sandbox[i][j] = 1;
+                            sandbox[i][j].changed = true;
+                        }
                     }
+
                 } else {
                     //Stabillity mode disable -> move down
                     sandbox[i][j].changed = true;
@@ -773,3 +776,16 @@ function saveCanvasAsPNG() {
     downloadLink.click();
     document.body.removeChild(downloadLink);
 }
+
+
+window.addEventListener("keydown", (e) => {
+
+    switch (e.key) {
+        case "m":
+        case"M":
+        case "Escape":
+            //Menu (controlls)
+            toggleControllVisibility();
+            break;  
+    }
+});
