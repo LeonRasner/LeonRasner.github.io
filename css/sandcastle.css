@@ -5,8 +5,8 @@ body {
 #gameContainer {
     display: flex;
     flex-direction: row;
-    width: 98%;
-    height: 98%;
+    width: 98vw;
+    height: 98vh;
     margin: 1vh 1vw;
 }
 
@@ -131,9 +131,19 @@ input[type="file"] {
     cursor: pointer;
 }
 
+#studentIdentifyer{
+    position: absolute;
+    color: white;
+    font-size: 1rem;
+    top: 2vh;
+    left: 2vw;
+}
+
 @media only screen and (max-width: 800px) {
     #gameContainer{
         flex-direction: column;
+        width: 98%;
+        height: 98%;
     }
 
     /* #controlls {
