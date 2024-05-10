@@ -19,23 +19,21 @@
     <canvas id="sandCanvas" width="900" height="900"></canvas>
     <div>
         <button class="btn" id="menuBtn" onclick="toggleControllVisibility()">🛠️</button>
-        <div id="controlls" class="hidden">
+        <div id="controlls" class="">
             <button class="btn" id="resetBtn" onclick="emptySandbox()">Clear Sandbox</button>
-            <br/>
             <label >Physics options:</label>
             <button class="btn" id="zeroGBtn" onclick="toggleZeroG()" title="Make sand stop in midair">No Gravity</button>
             <!-- <button class="btn" id="magneticBtn" onclick="toogleMagnetism()">Magnetic Sand</button> -->
-            <button class="btn" id="normalBtn" onclick="toggleStability(0)" title="Make sand pile up">Normal Sand</button>
+            <button class="btn active" id="normalBtn" onclick="toggleStability(0)" title="Make sand pile up">Normal Sand</button>
             <button class="btn" id="stickyBtn" onclick="toggleStability(1)" title="Make sand form towers">Sticky Sand</button>
             <button class="btn" id="veryStickyBtn" onclick="toggleStability(2)" title="Let sand stick together and form Overheads">Very sticky Sand</button>
-            <br/>
             <label for="colorsDiv">Color mode:</label>
             <div id="colorsDiv">
                 <input type="color" id="sandColor" style="opacity: 0; width: 0; margin: 0 -1rem 0 0;" >
                 <label for="sandColor" id="x-icon" title="Upload a image and turn it to sand. (Black will become empty space)" style="display: inline-block; width: fit-content;">
                     <div class="btn btnChoice" id="c0Btn" style="width: fit-content">
                         <span>🎨</span>
-                    </div>    
+                    </div>
                 </label>
                 <button class="btn btnChoice" id="c1Btn" title="Sand will be colored randomly"><span>🎲</span></button>
                 <button class="btn btnChoice active" id="c2Btn" title="Sand will change color slowly"><span>🌈</span></button>
@@ -43,10 +41,14 @@
             <div>
                 <button class="btn btnChoice" id="erBtn" title="Delete sand by clicking"><span>🧹</span> Eraser</button>
             </div> 
-            <br/>
             <label for="sizeRange" title="Choose how much Sand to create when clicking">Bucket size:</label>
             <input type="range" id="sizeRange" name="SandAmount" min="1" max="30" title="Choose how much Sand to create when clicking"/>
-            <br>
+            <label for="sizeDiv">Sandbox resolution:</label>
+            <div id="sizeDiv">
+                <button class="btn resBtn active" data-size="6" id="sdBtn" title="">SD</button>
+                <button class="btn resBtn" id="hdBtn" data-size="4" title="">HD</button>
+                <button class="btn resBtn" id="uhdBtn" data-size="2" title="">UHD</button>
+            </div> 
             <label for="imageInput">Sandify your image:</label>
             <label for="imageInput"  class="fakeButton" id="customFileUpload" title="Upload a image and turn it to sand. (Black will become empty space)">
                 <span>📁</span> Choose file
@@ -55,8 +57,9 @@
 
             <label for="downloadCanvas">Save sandbox as png:</label>
             <label id="downloadCanvas" class="fakeButton" title="Save canvas as PNG image (can be loaded again later)">
-                <span>💾</span> Download
+                <span>💾</span> Download image
             </label>
+
         </div>
     </div>
 </div>
