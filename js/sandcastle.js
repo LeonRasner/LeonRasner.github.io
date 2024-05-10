@@ -1,13 +1,13 @@
 //Leon's Sand Box
 
-//INITIAL SETUP ----------------------------------------------------------------------------
+//INITIAL SETUP ----------------------------------------------------------------------------------------------------------
 
 //Initialise Canvas
 let canvas = document.getElementById('sandCanvas');
-let ctx = canvas.getContext("2d", { alpha: false });
+let ctx;
 //Initialise Grid
 let sandbox;
-const grainSize = 6; //Determins "resolution" of sand box. 5 - 30 should work well. Anything below 5 can lead to significant performance losses, over 50 to crashes.
+let grainSize = 6; //Determins "resolution" of sand box. 5 - 30 should work well. Anything below 5 can lead to significant performance losses, over 50 to crashes.
 let grainNum = parseInt(canvas.width / grainSize);
 let grainNumV = parseInt(canvas.height / grainSize);
 //Game variables
@@ -35,13 +35,30 @@ let colorH = 40; // Hue component of color
 let colorS = 81; // Saturation Component
 let colorL = 62; // Lightness Component
 let colorMode = 2; //0 = static, 1 = gradient, 3 = random
-//let shiftSpeed = 1; //by how much the Hue of colorH shifts each shiftGradient in %
+
+//Grain object represents 1 cell in sandbox
+function Grain(colorH, colorS, colorL, settled, changed) {
+    this.colorH = colorH; //Hue component of the Grains color
+    this.colorS = colorS; //Saturation
+    this.colorL = colorL; //Lightness
+    this.settled = settled; //0 -> directly above a grain with settled = 0 or the floor, 1 -> 1 grain away (only horicontal!!) ...
+    this.changed = changed; //true -> will be redrawn
+}
+
+// Adjust canvas size on document load
+document.addEventListener('DOMContentLoaded', prepGame);
+
+function prepGame() {
+    resizeCanvas();
+    //Start Game by showing initial screen
+    loadingAnimation();
+}
+//Set Canvas size based on screen. Limit to 1200px w/h
 function resizeCanvas() {
-    let container = canvas.parentNode; // Assuming the canvas is wrapped by a div or similar element
+    let container = canvas.parentNode;
 
     let maxWidth = 1200;
     let maxHeight = 1200;
-    debugger
     // Aspect ratio
     let ratio = Math.min(maxWidth / container.clientWidth, maxHeight / container.clientHeight);
 
@@ -53,24 +70,25 @@ function resizeCanvas() {
 
     canvas.width = width;
     canvas.height = height;
-    loadingAnimation();
 }
 
-// Adjust canvas size on document load and resize
-document.addEventListener('DOMContentLoaded', resizeCanvas);
+//START GAME ------------------------------------------------------------------------------------------------------------------------
 
+//Prep initial screen with physics-based Logo
 function loadingAnimation() {
     ZeroGMode = true;
     prepCanvas();
-    loadAndProcessImage(canvas, ctx, true)
+    loadInitialImage(false)
     document.addEventListener("touchstart", userstart);
     document.addEventListener("mousedown", userstart);
     setPickerColor(colorH,colorS,colorL);
     setTimeout(() => {
+        //Show help for inactive user
         if (!isrunning) centerHelpBox("Click and hold to start pouring sand");
     }, 6000);
 }
 
+//Real game starts when User interacts with screen 
 function userstart() {
     hideHelpBox()
     document.removeEventListener("touchstart", userstart);
@@ -83,16 +101,7 @@ function userstart() {
     }, 6000);
 }
 
-function prepCanvas() {
-    grainNum = parseInt(canvas.width / grainSize);
-    grainNumV = parseInt(canvas.height / grainSize);
-    ctx = canvas.getContext("2d", { alpha: false });
-    sandbox = new Array(grainNumV).fill(null).map(() => new Array(grainNum).fill(1));
-
-    clearScreen();
-    emptySandbox();
-}
-
+//Starts Physics- and Rendering-Loops
 function startGame() {
     isrunning = true;
     ZeroGMode = false;
@@ -100,81 +109,70 @@ function startGame() {
     gameLoop();
     requestAnimationFrame(renderLoop);
 }
+//Restart game and reset canvas + sandbox (allows resize)
+//Optional image will be loaded to sandbox after reset
+function restartGame(image = false) {
+    isrunning = false;
+    setTimeout(() => {
+        resizeCanvas();
+        prepCanvas();
+        if (image) {
+            prepImage(image, true);
+        }
+        startGame();
+    }, 300);
+}
+
+//Set canvas variables
+function prepCanvas() {
+    grainNum = parseInt(canvas.width / grainSize);
+    grainNumV = parseInt(canvas.height / grainSize);
+    ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true  });
+    sandbox = new Array(grainNumV).fill(null).map(() => new Array(grainNum).fill(1));
+
+    clearScreen();
+    emptySandbox();
+}
+
+//Advances Logical state of sandbox repeatedly
 function gameLoop() {
     checkClick();
     physics();
-    setTimeout(gameLoop, 1000 / gameSpeed);
+    if (isrunning) setTimeout(gameLoop, 1000 / gameSpeed);
 }
 
+//Renders Current Sandbox to Canvas based on browser framerate
+let frameToggle = true;
 function renderLoop() {
     drawSandbox();
-    requestAnimationFrame(renderLoop);
+    if (isrunning) {
+        requestAnimationFrame(renderLoop);
+    } 
 }
 
 
 //USER INTERACTION --------------------------------------------------------------------------
-// Store references to event listener functions
-let mouseMoveListener, mouseUpListener;
+
+let mouseMoveListener;
+let mouseUpListener;
 
 function getPositionFromEvent(evt, canvas) {
     if (evt.touches) {
-        evt = evt.touches[0]; // Get the first touch
+        evt = evt.touches[0]; // Get first touch
     }
     return getMousePos(canvas, evt);
 }
 
-function addTouchListeners() {
-    // Add touchmove event listener
-    touchMoveListener = function (e) {
-        e.preventDefault(); // Prevent scrolling and other default actions
-        let pos = getPositionFromEvent(e, canvas);
-        mouseX = pos.x;
-        mouseY = pos.y;
-    };
-    canvas.addEventListener('touchmove', touchMoveListener);
-
-    // Add touchend event listener
-    touchEndListener = function () {
-        mousedown = false;
-
-        // Remove event listeners
-        canvas.removeEventListener('touchmove', touchMoveListener);
-        canvas.removeEventListener('touchend', touchEndListener);
-        canvas.removeEventListener('touchcancel', touchEndListener); // Handle cancellation
-    };
-    canvas.addEventListener('touchend', touchEndListener);
-    canvas.addEventListener('touchcancel', touchEndListener); // Handle cancellation
-}
-
-function addMouseListeners() {
-    // Add mousemove event listener
-    mouseMoveListener = function (e) {
-        let pos = getPositionFromEvent(e, canvas);
-        mouseX = pos.x;
-        mouseY = pos.y;
-    };
-    canvas.addEventListener('mousemove', mouseMoveListener);
-
-    // Add mouseup event listener
-    mouseUpListener = function () {
-        mousedown = false;
-
-        // Remove event listeners
-        canvas.removeEventListener('mousemove', mouseMoveListener);
-        canvas.removeEventListener('mouseup', mouseUpListener);
-    };
-    document.addEventListener('mouseup', mouseUpListener);
-}
-
+//Listen for klick
 canvas.addEventListener('mousedown', function (evt) {
     mousedown = true;
     let pos = getPositionFromEvent(evt, canvas);
     mouseX = pos.x;
     mouseY = pos.y;
 
-    addMouseListeners(); // Set up additional mouse event handlers
+    addMouseListeners(); // Add listeneres for end of klick
 });
-
+//Listen for touch
 canvas.addEventListener('touchstart', function (evt) {
     evt.preventDefault(); // Prevent default actions like scrolling
     mousedown = true;
@@ -182,10 +180,50 @@ canvas.addEventListener('touchstart', function (evt) {
     mouseX = pos.x;
     mouseY = pos.y;
 
-    addTouchListeners(); // Set up additional touch event handlers
+    addTouchListeners(); // Add listeneres for end of touch
 });
+//Handle touch moves
+function addTouchListeners() {
+    touchMoveListener = function (e) {
+        e.preventDefault(); // Prevent scrolling
+        let pos = getPositionFromEvent(e, canvas);
+        mouseX = pos.x;
+        mouseY = pos.y;
+    };
+    canvas.addEventListener('touchmove', touchMoveListener);
 
+    // Listen for end
+    touchEndListener = function () {
+        mousedown = false;
 
+        // Remove listeners
+        canvas.removeEventListener('touchmove', touchMoveListener);
+        canvas.removeEventListener('touchend', touchEndListener);
+        canvas.removeEventListener('touchcancel', touchEndListener); // Handle cancellation
+    };
+    canvas.addEventListener('touchend', touchEndListener);
+    canvas.addEventListener('touchcancel', touchEndListener); // Handle cancellation
+}
+//Handle mouse moves
+function addMouseListeners() {
+    mouseMoveListener = function (e) {
+        let pos = getPositionFromEvent(e, canvas);
+        mouseX = pos.x;
+        mouseY = pos.y;
+    };
+    canvas.addEventListener('mousemove', mouseMoveListener);
+
+    // Listen for end
+    mouseUpListener = function () {
+        mousedown = false;
+
+        // Remove listeners
+        canvas.removeEventListener('mousemove', mouseMoveListener);
+        canvas.removeEventListener('mouseup', mouseUpListener);
+    };
+    document.addEventListener('mouseup', mouseUpListener);
+}
+//Calculate position on canvas
 function getMousePos(canvas, evt) {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
@@ -195,67 +233,257 @@ function getMousePos(canvas, evt) {
         y: (evt.clientY - rect.top) * scaleY
     };
 }
+//Calculate index in sandbox array
 function getArrayIndexForMouse(x, y) {
     return {
         x: Math.floor(x / grainSize),
         y: Math.floor(y / grainSize)
     };
 }
+//Every frame trigger interaction if mouse is clicked / touched
 function checkClick() {
     if (mousedown) {
         const mouseIndex = getArrayIndexForMouse(mouseY, mouseX);
-        eraserMode ? deleteSand(mouseIndex.x, mouseIndex.y, false) : spawnSand(mouseIndex.x, mouseIndex.y, chooseColor());
+        eraserMode ? deleteSand(mouseIndex.x, mouseIndex.y) : spawnSand(mouseIndex.x, mouseIndex.y, chooseColor());
         setPickerColor(colorH, colorS, colorL);
     }
 }
+//Spawn sand at position
 function spawnSand(x, y, color) {
     let startX = x - Math.floor(spawnAmount / 2);
     let startY = y - Math.floor(spawnAmount / 2);
 
     for (let i = 0; i < spawnAmount; i++) {
-        // Generate random position
+        // Randomize position within spawnAmount
+        let nx = startX + Math.floor(Math.random() * spawnAmount);
+        let ny = startY + Math.floor(Math.random() * spawnAmount);
+
+        // Check if within array
+        if (nx >= 0 && nx < sandbox.length && ny >= 0 && ny < sandbox[nx].length) {
+            sandbox[nx][ny] = new Grain(color, colorS, colorL, null, true); //Fill cell with grain
+        }
+    }
+}
+//Delete sand at position
+function deleteSand(x, y) {
+    let startX = x - Math.floor(spawnAmount / 2);
+    let startY = y - Math.floor(spawnAmount / 2);
+    for (let i = 0; i < spawnAmount; i++) {
+        // Randomize position within spawnAmount
         let nx = startX + Math.floor(Math.random() * spawnAmount);
         let ny = startY + Math.floor(Math.random() * spawnAmount);
 
         // Check if coordinates are within array
         if (nx >= 0 && nx < sandbox.length && ny >= 0 && ny < sandbox[nx].length) {
-            sandbox[nx][ny] = new Grain(color, colorS, colorL, null, true);
+            sandbox[nx][ny] = 1; //Empty cell
         }
     }
 }
+//MENU ELEMENTS ----------------------------------------------------------------------------------------------
 
-function deleteSand(x, y, deletefast) {
-    let startX = x - Math.floor(spawnAmount / 2);
-    let startY = y - Math.floor(spawnAmount / 2);
-    if (deletefast) {
-        for (let i = startX; i < x + (spawnAmount / 2); i++) {
-            for (let j = startY; j < y + (spawnAmount / 2); j++) {
-                // Check if coordinates are within array
-                if (i >= 0 && i < sandbox.length && j >= 0 && j < sandbox[i].length) {
-                    sandbox[i][j] = 1;
-                }
-            }
-        }
-    } else {
-        for (let i = 0; i < spawnAmount; i++) {
-            // Generate random position
-            let nx = startX + Math.floor(Math.random() * spawnAmount);
-            let ny = startY + Math.floor(Math.random() * spawnAmount);
-
-            // Check if coordinates are within array
-            if (nx >= 0 && nx < sandbox.length && ny >= 0 && ny < sandbox[nx].length) {
-                sandbox[nx][ny] = 1;
-            }
-        }
-    }
-}
-
+// Bucket Size
 const sizeRange = document.getElementById("sizeRange");
 sizeRange.value = spawnAmount;
 sizeRange.addEventListener("change", () => spawnAmount = parseInt(sizeRange.value));
 
-//------------------------------------------------------------------------
+//choose single sand color
+const colorPicker = document.getElementById("sandColor");
+const c0Btn = document.getElementById("c0Btn");
+colorPicker.addEventListener("input", x => setHslColorFromHex(colorPicker.value));
 
+//Upload / download Image
+document.getElementById('imageInput').addEventListener('change', function (e) {loadCustomImage(e)});
+document.getElementById('downloadCanvas').addEventListener('click', x => saveCanvasAsPNG());
+
+//Initialize choice buttons butotons
+let choiceBtns = document.getElementsByClassName("btnChoice");
+for (var i = 0; i < choiceBtns.length; i++) {
+    choiceBtns[i].addEventListener('click', x => choiceBtnClick(x), false);
+}
+
+//Handle keyboard inputs
+window.addEventListener("keydown", (e) => {
+
+    switch (e.key) {
+        case "m":
+        case"M":
+        case "Escape":
+            //Menu (controlls)
+            toggleControllVisibility();
+            break;  
+    }
+});
+
+const controlls = document.getElementById("controlls");
+const menuBtn = document.getElementById("menuBtn");
+
+//Open / close menu
+function toggleControllVisibility() {
+    if (controlls.classList.contains("hidden")) {
+        controlls.classList.remove("hidden");
+        menuBtn.innerHTML = "❌"
+    } else {
+        controlls.classList.add("hidden");
+        menuBtn.innerHTML = "🛠️"
+    }
+}
+
+//Return Hue component of HSL color depending on current colorMode
+function chooseColor() {
+    switch (colorMode) {
+        case 0:
+            return colorH;
+        case 1:
+            return Math.floor(Math.random() * 361); //Random number between 0 and 360
+        case 2:
+            return shiftGradient();
+        default:
+            return colorH;
+    }
+}
+
+function setColorMode(c) {
+    colorMode = c;
+}
+function setHslColorFromHex(hexColor) {
+    let [r, g, b] = hexToRgb(hexColor);
+    let [h, s, l] = rgbToHsl(r, g, b);
+    colorH = h;
+    colorS = s;
+    colorL = l;
+}
+//Change Color picker based on hsl colors
+function setPickerColor(h, s, l) {
+    let rgb = hslToRgb(h, s, l)
+    let hex = rgbToHex(rgb[0], rgb[1], rgb[2]);
+    colorPicker.value = hex;
+    c0Btn.style.background = hex;
+
+}
+
+
+//Toggle options based on onclick events ------------
+//Magnetism on/off
+function toogleMagnetism() {
+    MagnetismMode = !MagnetismMode;
+}
+//ZeroG on/off
+function toggleZeroG() {
+    if (ZeroGMode) {
+        // document.getElementById("zeroGBtn").innerHTML = "👩‍🚀"
+        document.getElementById("zeroGBtn").classList.remove("active")
+    } else{
+        // document.getElementById("zeroGBtn").innerHTML = "🌍" 	        
+        document.getElementById("zeroGBtn").classList.add("active")
+    }
+    ZeroGMode = !ZeroGMode;
+}
+//Choice Buttons (color-modes / eraser) - only one can be active
+function choiceBtnClick(x) {
+    let targetBtn = x.currentTarget
+    //Remove active style from all buttons and add it to click-target.
+    let toggleEraser = false;
+        for (var i = 0; i < choiceBtns.length; i++) {
+            if (choiceBtns[i].classList.contains("active")) {
+                choiceBtns[i].classList.remove("active");
+                //Change color mode based on click-target
+                switch (targetBtn.id) {
+                    case "c0Btn":
+                        colorMode = 0;
+                        eraserMode = false;
+                        break;
+                    case "c1Btn":
+                        colorMode = 1;
+                        eraserMode = false;
+                        break;
+                    case "c2Btn":
+                        colorMode = 2;
+                        eraserMode = false;
+                        break;
+                    case "erBtn":
+                        if (eraserMode) {
+                            toggleEraser = true;
+                        } else {
+                            eraserMode = true;
+                        }
+                        break;
+                    default:
+                        break
+                }
+            }
+        }
+        if (toggleEraser) {
+            choiceBtns[colorMode].classList.add("active");
+            eraserMode = false;
+        } else {
+            targetBtn.classList.add("active");
+        }
+
+}
+
+//Initialize resolution buttons
+let resBtns = document.getElementsByClassName("resBtn");
+for (var i = 0; i < resBtns.length; i++) {
+    resBtns[i].addEventListener('click', x => resolutionBtnClick(x), false);
+}
+
+function resolutionBtnClick(x) {
+    let targetBtn = x.currentTarget
+    //Remove active style from all buttons and add it to click-target.
+        for (var i = 0; i < resBtns.length; i++) {
+            if (resBtns[i].classList.contains("active")) {
+                resBtns[i].classList.remove("active");
+            }
+        }
+        changeGrainSize(targetBtn.getAttribute("data-size"));
+        targetBtn.classList.add("active");
+        
+}
+
+
+// Change stability mode
+// 0 -> "Normal Sand" ; 1 -> "Sticky Sand" ; 2 -> "Very Sticky Sand"; (Only one can be active at once)
+function toggleStability(a) {
+    if (a == 0) {
+            document.getElementById("stickyBtn").classList.remove("active");
+            document.getElementById("veryStickyBtn").classList.remove("active");
+            document.getElementById("normalBtn").classList.add("active");
+            stickyMode = false
+            veryStickyMode = false;
+    } else if (a == 1) {
+        if (veryStickyMode || !stickyMode) {
+            document.getElementById("stickyBtn").classList.add("active");
+            document.getElementById("veryStickyBtn").classList.remove("active");
+            document.getElementById("normalBtn").classList.remove("active");
+            stickyMode = true;
+            veryStickyMode = false;
+        } else if (stickyMode) {
+            document.getElementById("stickyBtn").classList.remove("active");
+            document.getElementById("veryStickyBtn").classList.remove("active");
+            document.getElementById("normalBtn").classList.add("active");
+            stickyMode = false
+            veryStickyMode = false;
+        }
+    } else {
+        if (veryStickyMode) {
+            document.getElementById("veryStickyBtn").classList.remove("active");
+            document.getElementById("stickyBtn").classList.remove("active");
+            document.getElementById("normalBtn").classList.add("active");
+            veryStickyMode = false;
+            stickyMode = false;
+        } else{
+            document.getElementById("veryStickyBtn").classList.add("active");
+            document.getElementById("stickyBtn").classList.remove("active");
+            document.getElementById("normalBtn").classList.remove("active");
+            veryStickyMode = true;
+            stickyMode = true;
+        }
+    }
+}
+
+//RENDERING -----------------------------------------------------------------------------------------------------------------------
+
+//Clear canvas (paint it black)
 function clearScreen() {
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -270,7 +498,8 @@ function emptySandbox() {
     }
 }
 
-//draw #000 for 0 and #fff for 1 in sandbox array
+// Render sandbox to canvas. 1 and 0 -> colorBackground ; Grain -> hsl color of grain
+// 1 or Grain.changed -> Will be drawn; Otherwise no change, so won't be drawn again
 function drawSandbox() {
     ctx.beginPath();
     for (let i = sandbox.length - 1; i >= 0; i--) {
@@ -288,25 +517,242 @@ function drawSandbox() {
     }
 }
 
-function chooseColor() {
-    switch (colorMode) {
-        case 0:
-            return colorH;
-        case 1:
-            return Math.floor(Math.random() * 361); //Random number between 0 and 360
-        case 2:
-            return shiftGradient();
-        default:
-            return colorH;
+//Change grainSize and reset game while keeping curent image
+function changeGrainSize(size){
+    let sizeFactor = parseInt(grainSize / size);
+    grainSize = size;
+
+    const tempCanvas = document.createElement('canvas');   
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.filter = 'blur('+sizeFactor+'px)';
+    tempCtx.drawImage(canvas, 0, 0);
+
+    const imageDataUrl = tempCanvas.toDataURL('image/png');
+    const image = new Image();
+    image.src = imageDataUrl;
+    image.onload = function() {
+        restartGame(image)
+    };
+}
+
+let gradientCnt = 0
+//Slowly shift color for Gradient mode
+function shiftGradient() {
+    if (gradientCnt == 2) {
+        colorH = colorH == 361 ? 0 : colorH + 1;
+        gradientCnt = 0;
+    }
+    gradientCnt++;
+    return colorH;
+}
+
+//COLOR Conversion (AI generated) ------------------------------------------------------------------------------------------------
+function hslToRgb(h, s, l) {
+    s /= 100;
+    l /= 100;
+    let c = (1 - Math.abs(2 * l - 1)) * s;
+    let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    let m = l - c / 2;
+    let r = 0;
+    let g = 0;
+    let b = 0;
+
+    if (0 <= h && h < 60) {
+        r = c; g = x; b = 0;
+    } else if (60 <= h && h < 120) {
+        r = x; g = c; b = 0;
+    } else if (120 <= h && h < 180) {
+        r = 0; g = c; b = x;
+    } else if (180 <= h && h < 240) {
+        r = 0; g = x; b = c;
+    } else if (240 <= h && h < 300) {
+        r = x; g = 0; b = c;
+    } else if (300 <= h && h < 360) {
+        r = c; g = 0; b = x;
+    }
+    r = Math.round((r + m) * 255);
+    g = Math.round((g + m) * 255);
+    b = Math.round((b + m) * 255);
+
+    return [r, g, b];
+}
+function rgbToHex(r, g, b) {
+    r = r.toString(16).padStart(2, '0');
+    g = g.toString(16).padStart(2, '0');
+    b = b.toString(16).padStart(2, '0');
+    return `#${r}${g}${b}`;
+}
+function hexToRgb(hex) {
+    // Remove the hash at the start if it's there
+    hex = hex.replace(/^\s*#|\s*$/g, '');
+
+    // Parse the hex into RGB
+    let r = parseInt(hex.substr(0, 2), 16);
+    let g = parseInt(hex.substr(2, 2), 16);
+    let b = parseInt(hex.substr(4, 2), 16);
+
+    return [r, g, b];
+}
+function rgbToHsl(r, g, b) {
+    r /= 255, g /= 255, b /= 255;
+    let max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max == min) {
+        h = s = 0;
+    } else {
+        let d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+
+    return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+}
+
+
+// IMAGE PROCESSING --------------------------------------------------------------------------------------------------------------
+
+//Determin image scaling and draw it to canvas
+function prepImage(image, keepAspect) {
+    //Empty sandbox and canvas
+    emptySandbox();
+    drawSandbox();
+    //Draw Image
+    if (!keepAspect) {
+        //Draw in a 1-1- ratio
+        let a = Math.min(canvas.width, canvas.height)
+        let offx = (canvas.width - a) / 2;
+        let offy = (canvas.height - a) / 2;
+        ctx.drawImage(image, offx, offy, a, a);
+    } else {
+        //Draw in real image ratio
+        let canvasWidth = canvas.width;
+        let canvasHeight = canvas.height;
+        let canvasRatio = canvasWidth / canvasHeight;
+        
+        let width = image.naturalWidth;
+        let height = image.naturalHeight;
+        let imageRatio = width / height;
+        
+        let drawWidth, drawHeight, offsetX, offsetY;
+        
+        // Determine image scale
+        if (imageRatio < canvasRatio) {
+            // Fit to height and adjust width
+            drawHeight = canvasHeight;
+            drawWidth = canvasHeight * imageRatio;
+            offsetX = (canvasWidth - drawWidth) / 2;  // Center horizontally
+            offsetY = 0;  // Align top
+        } else {
+            // Fit to width and adjust height
+            drawWidth = canvasWidth;
+            drawHeight = canvasWidth / imageRatio;
+            offsetX = 0;  // Align left
+            offsetY = (canvasHeight - drawHeight) / 2;  // Center vertically
+        }
+
+        // Draw the image scaled within the canvas and centered
+        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+        
+    }
+    processImage(canvas.width, canvas.height);
+}
+
+//Read image from canvas and translate it to sandbox
+function processImage(width, height) {
+    //Read image
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    //Place according grains in sandbox
+    for (let i = sandbox.length - 1; i >= 0; i--) {
+        for (let j = sandbox[i].length - 1; j >= 0; j--) {
+            //Read color data from imageDate
+            const ii = Math.floor(i * grainSize * 4);
+            const ij = Math.floor(j * grainSize * 4);
+            const index = (ii * width + ij);
+            const r = data[index];
+            const g = data[index + 1];
+            const b = data[index + 2];
+            //Place grains based on data
+            if (r == null || r < 50 && b < 50 && g < 50) {
+                //Dark pixles become empty space
+                sandbox[i][j] = 1;
+            } else {
+                //Grain with pixle color is placed
+                const hsl = rgbToHsl(r, g, b);
+                sandbox[i][j] = new Grain(hsl[0], hsl[1], hsl[2], null, true);
+            }
+        }
+    }
+    //Render sandbox
+    clearScreen();
+    drawSandbox();
+}
+
+//Loade an image from upload event and check it
+function loadCustomImage(e) {
+    if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+
+        // Ensure it's an image
+        if (file.type.match('image.*')) {
+            const reader = new FileReader();
+
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    prepImage(img, true);
+                };
+                
+                img.src = evt.target.result; // Set image source to data URL
+                canvas.style.display = 'block'; // Show canvas
+            };
+
+            // Read the file as Data URL
+            reader.readAsDataURL(file);
+        } else {
+            console.error('File is not an image.');
+        }
     }
 }
 
-function setColorMode(c) {
-    colorMode = c;
+//Save current canvas state as PNG and download it to client
+//Optionally append metadata string to filename (current game settings)
+function saveCanvasAsPNG(metadata = "") {
+    let dataURL = canvas.toDataURL('image/png');
+
+    // Create "fake" download link for image
+    let downloadLink = document.createElement('a');
+    downloadLink.href = dataURL;
+    downloadLink.download = 'sandbox_'+ Date.now() + metadata +'.png';
+
+    // Trigger link click to start download
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
 }
 
+//Load Logo for game start
+function loadInitialImage(keepAspect) {
+    const image = new Image();
+    image.src = '/images/sandbox.png'; // Path to your image
+    image.onload = () => {
+        prepImage(image, keepAspect);
+    };
+}
+
+// SIMULATION -------------------------------------------------------------------------------------------------------------
+
+// Determin logical state of all grains in sandbox (position)
 function physics() {
-    //Magnetism ---------------
+    //Magnetism (Currently not working right)
     if (MagnetismMode) {
         for (let i = sandbox.length - 1; i >= 0; i--) {
             for (let j = sandbox[i].length - 1; j >= 0; j--) {
@@ -365,6 +811,7 @@ function physics() {
     }
 }
 
+//Determin direction of movement for every grain in sandbox
 function gravity(i,j) {
     if (sandbox[i][j] !== 0 && sandbox[i][j] !== 1) {
         //Check for every grain
@@ -372,36 +819,34 @@ function gravity(i,j) {
             //Not floor row
             if (sandbox[i + 1][j] === 0 || sandbox[i + 1][j] === 1) {
                 //Zero G --------------------
-                if (ZeroGMode) {
-
-                }
-                //Stabillity ----------------
-                else if (veryStickyMode) {
-                    let leftEdge = j == 0;
-                    let rightEdge = j == sandbox[i].length - 1;
-                    if (sandbox[i][j].settled == null || sandbox[i][j].settled > stabillity) {
-                        if (!leftEdge && sandbox[i][j - 1] != 0 && sandbox[i][j - 1] != 1 && sandbox[i][j - 1].settled != null && sandbox[i][j - 1].settled < stabillity) {
-                            //settled piece to left
-                            sandbox[i][j].settled = sandbox[i][j - 1].settled + 1;
-                        } else if (!rightEdge && sandbox[i][j + 1] != 0 && sandbox[i][j + 1] != 1 && sandbox[i][j + 1].settled != null && sandbox[i][j + 1].settled < stabillity) {
-                            //settled piece to right
-                            sandbox[i][j].settled = sandbox[i][j + 1].settled + 1;
-                        } else {
-                            //No settled piece left or right -> move down
-                            sandbox[i][j].changed = true;
-                            sandbox[i + 1][j] = sandbox[i][j];
-                            sandbox[i][j] = 1;
-                            sandbox[i][j].changed = true;
+                if (!ZeroGMode) {
+                    //Stabillity ----------------
+                    if (veryStickyMode) {
+                        let leftEdge = j == 0;
+                        let rightEdge = j == sandbox[i].length - 1;
+                        if (sandbox[i][j].settled == null || sandbox[i][j].settled > stabillity) {
+                            if (!leftEdge && sandbox[i][j - 1] != 0 && sandbox[i][j - 1] != 1 && sandbox[i][j - 1].settled != null && sandbox[i][j - 1].settled < stabillity) {
+                                //settled piece to left
+                                sandbox[i][j].settled = sandbox[i][j - 1].settled + 1;
+                            } else if (!rightEdge && sandbox[i][j + 1] != 0 && sandbox[i][j + 1] != 1 && sandbox[i][j + 1].settled != null && sandbox[i][j + 1].settled < stabillity) {
+                                //settled piece to right
+                                sandbox[i][j].settled = sandbox[i][j + 1].settled + 1;
+                            } else {
+                                //No settled piece left or right -> move down
+                                sandbox[i][j].changed = true;
+                                sandbox[i + 1][j] = sandbox[i][j];
+                                sandbox[i][j] = 1;
+                                sandbox[i][j].changed = true;
+                            }
                         }
+
+                    } else {
+                        //Stabillity mode disable -> move down
+                        sandbox[i][j].changed = true;
+                        sandbox[i + 1][j] = sandbox[i][j];
+                        sandbox[i][j] = 1;
                     }
-
-                } else {
-                    //Stabillity mode disable -> move down
-                    sandbox[i][j].changed = true;
-                    sandbox[i + 1][j] = sandbox[i][j];
-                    sandbox[i][j] = 1;
                 }
-
             } else {
                 //sits on top of settled piece -> settled == piece below
                 if (!stickyMode && !ZeroGMode) {
@@ -440,352 +885,3 @@ function gravity(i,j) {
         }
     }
 }
-
-function Grain(colorH, colorS, colorL, settled, changed) {
-    this.colorH = colorH; //Hue component of the Grains color
-    this.colorS = colorS; //Saturation
-    this.colorL = colorL; //Lightness
-    this.settled = settled; //0 -> directly above a grain with settled = 0 or the floor, 1 -> 1 grain away (only horicontal!!) ...
-    this.changed = changed; //true -> will be redrawn
-}
-
-const colorPicker = document.getElementById("sandColor");
-const c0Btn = document.getElementById("c0Btn");
-colorPicker.addEventListener("input", x => changColorFromPicker(colorPicker.value));
-
-function changColorFromPicker(hexColor) {
-    let [r, g, b] = hexToRgb(hexColor);
-    let [h, s, l] = rgbToHsl(r, g, b);
-    colorH = h;
-    colorS = s;
-    colorL = l;
-}
-
-function setPickerColor(h, s, l) {
-    let rgb = hslToRgb(h, s, l)
-    let hex = rgbToHex(rgb[0], rgb[1], rgb[2]);
-    colorPicker.value = hex;
-    c0Btn.style.background = hex;
-
-}
-
-function hslToRgb(h, s, l) {
-    s /= 100;
-    l /= 100;
-    let c = (1 - Math.abs(2 * l - 1)) * s;
-    let x = c * (1 - Math.abs((h / 60) % 2 - 1));
-    let m = l - c / 2;
-    let r = 0;
-    let g = 0;
-    let b = 0;
-
-    if (0 <= h && h < 60) {
-        r = c; g = x; b = 0;
-    } else if (60 <= h && h < 120) {
-        r = x; g = c; b = 0;
-    } else if (120 <= h && h < 180) {
-        r = 0; g = c; b = x;
-    } else if (180 <= h && h < 240) {
-        r = 0; g = x; b = c;
-    } else if (240 <= h && h < 300) {
-        r = x; g = 0; b = c;
-    } else if (300 <= h && h < 360) {
-        r = c; g = 0; b = x;
-    }
-    r = Math.round((r + m) * 255);
-    g = Math.round((g + m) * 255);
-    b = Math.round((b + m) * 255);
-
-    return [r, g, b];
-}
-
-function rgbToHex(r, g, b) {
-    r = r.toString(16).padStart(2, '0');
-    g = g.toString(16).padStart(2, '0');
-    b = b.toString(16).padStart(2, '0');
-    return `#${r}${g}${b}`;
-}
-
-
-function hexToRgb(hex) {
-    // Remove the hash at the start if it's there
-    hex = hex.replace(/^\s*#|\s*$/g, '');
-
-    // Parse the hex into RGB
-    let r = parseInt(hex.substr(0, 2), 16);
-    let g = parseInt(hex.substr(2, 2), 16);
-    let b = parseInt(hex.substr(4, 2), 16);
-
-    return [r, g, b];
-}
-
-function rgbToHsl(r, g, b) {
-    r /= 255, g /= 255, b /= 255;
-    let max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-
-    if (max == min) {
-        h = s = 0; // achromatic
-    } else {
-        let d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
-    }
-
-    return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
-}
-
-function toogleMagnetism() {
-    MagnetismMode = !MagnetismMode;
-}
-
-function toggleStability(a) {
-    if (a == 0) {
-            document.getElementById("stickyBtn").classList.remove("active");
-            document.getElementById("veryStickyBtn").classList.remove("active");
-            stickyMode = false
-            veryStickyMode = false;
-    } else if (a == 1) {
-        if (veryStickyMode || !stickyMode) {
-            document.getElementById("stickyBtn").classList.add("active");
-            document.getElementById("veryStickyBtn").classList.remove("active");
-            stickyMode = true;
-            veryStickyMode = false;
-        } else if (stickyMode) {
-            document.getElementById("stickyBtn").classList.remove("active");
-            document.getElementById("veryStickyBtn").classList.remove("active");
-            stickyMode = false
-            veryStickyMode = false;
-        }
-    } else {
-        if (veryStickyMode) {
-            document.getElementById("veryStickyBtn").classList.remove("active");
-            document.getElementById("stickyBtn").classList.remove("active");
-            veryStickyMode = false;
-            stickyMode = false;
-        } else{
-            document.getElementById("veryStickyBtn").classList.add("active");
-            document.getElementById("stickyBtn").classList.remove("active");
-            veryStickyMode = true;
-            stickyMode = true;
-        }
-    }
-}
-
-let gradientCnt = 0
-function shiftGradient() {
-    if (gradientCnt == 2) {
-        colorH = colorH == 361 ? 0 : colorH + 1;
-        gradientCnt = 0;
-    }
-    gradientCnt++;
-    return colorH;
-}
-
-function toggleEraser() {
-    eraserMode = !eraserMode;
-}
-
-function toggleZeroG() {
-    if (ZeroGMode) {
-        // document.getElementById("zeroGBtn").innerHTML = "👩‍🚀"
-        document.getElementById("zeroGBtn").classList.remove("active")
-    } else{
-        // document.getElementById("zeroGBtn").innerHTML = "🌍" 	        
-        document.getElementById("zeroGBtn").classList.add("active")
-    }
-    ZeroGMode = !ZeroGMode;
-}
-
-const controlls = document.getElementById("controlls");
-const menuBtn = document.getElementById("menuBtn");
-
-function toggleControllVisibility() {
-    if (controlls.classList.contains("hidden")) {
-        controlls.classList.remove("hidden");
-        menuBtn.innerHTML = "❌"
-    } else {
-        controlls.classList.add("hidden");
-        menuBtn.innerHTML = "🛠️"
-    }
-}
-
-let choiceBtns = document.getElementsByClassName("btnChoice");
-
-for (var i = 0; i < choiceBtns.length; i++) {
-    choiceBtns[i].addEventListener('click', x => choiceBtnClick(x), false);
-}
-
-function choiceBtnClick(x) {
-    let targetBtn = x.currentTarget
-        for (var i = 0; i < choiceBtns.length; i++) {
-            if (choiceBtns[i].classList.contains("active")) {
-                choiceBtns[i].classList.remove("active");
-                targetBtn.classList.add("active");
-                switch (targetBtn.id) {
-                    case "c0Btn":
-                        colorMode = 0;
-                        eraserMode = false;
-                        break;
-                    case "c1Btn":
-                        colorMode = 1;
-                        eraserMode = false;
-                        break;
-                    case "c2Btn":
-                        colorMode = 2;
-                        eraserMode = false;
-                        break;
-                    case "erBtn":
-                        eraserMode = true;
-                        break;
-                    default:
-                        break
-                }
-            }
-        }
-}
-
-
-// IMAGE PROCESSING ---------------------------------------------------------------------
-
-
-function loadAndProcessImage(canvas, ctx, keepAspect) {
-    const image = new Image();
-    image.src = '/images/sandbox.png'; // Path to your image
-    image.onload = () => {
-        prepImage(image, ctx, keepAspect);
-    };
-}
-
-
-function prepImage(image, ctx, keepAspect) {
-    emptySandbox();
-    drawSandbox();
-    if (keepAspect) {
-        let a = Math.min(canvas.width, canvas.height)
-        let offx = (canvas.width - a) / 2;
-        let offy = (canvas.height - a) / 2;
-        ctx.drawImage(image, offx, offy, a, a);
-    } else {
-        let canvasWidth = canvas.width;
-        let canvasHeight = canvas.height;
-        let canvasRatio = canvasWidth / canvasHeight;
-        
-        let width = image.naturalWidth;
-        let height = image.naturalHeight;
-        let imageRatio = width / height;
-        
-        let drawWidth, drawHeight, offsetX, offsetY;
-        
-        // Determine how to scale the image
-        if (imageRatio < canvasRatio) {
-            // Image ratio is narrower than canvas ratio
-            // Fit to height and adjust width
-            drawHeight = canvasHeight;
-            drawWidth = canvasHeight * imageRatio;
-            offsetX = (canvasWidth - drawWidth) / 2;  // Center horizontally
-            offsetY = 0;  // Align top
-        } else {
-            // Image ratio is wider than canvas ratio
-            // Fit to width and adjust height
-            drawWidth = canvasWidth;
-            drawHeight = canvasWidth / imageRatio;
-            offsetX = 0;  // Align left
-            offsetY = (canvasHeight - drawHeight) / 2;  // Center vertically
-        }
-
-        // Draw the image scaled to fit within the canvas and centered
-        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-        
-    }
-    processImage(ctx, canvas.width, canvas.height);
-}
-
-
-function processImage(ctx, width, height) {
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-
-    for (let i = sandbox.length - 1; i >= 0; i--) {
-        for (let j = sandbox[i].length - 1; j >= 0; j--) {
-            const ii = Math.floor(i * grainSize * 4);
-            const ij = Math.floor(j * grainSize * 4);
-            const index = (ii * width + ij);
-            const r = data[index];
-            const g = data[index + 1];
-            const b = data[index + 2];
-
-            if (r == null || r < 50 && b < 50 && g < 50) {
-                sandbox[i][j] = 1;
-            } else {
-                55
-                const hsl = rgbToHsl(r, g, b);
-                sandbox[i][j] = new Grain(hsl[0], hsl[1], hsl[2], null, true);
-            }
-        }
-    }
-    drawSandbox();
-}
-
-
-document.getElementById('imageInput').addEventListener('change', function(event) {
-    if (event.target.files && event.target.files[0]) {
-        const file = event.target.files[0];
-
-        // Ensure it's an image
-        if (file.type.match('image.*')) {
-            const reader = new FileReader();
-
-            reader.onload = function(evt) {
-                const img = new Image();
-                img.onload = function() {
-                    prepImage(img, ctx, false);
-                };
-                
-                img.src = evt.target.result; // Set image source to data URL
-                canvas.style.display = 'block'; // Show canvas
-            };
-
-            // Read the file as Data URL
-            reader.readAsDataURL(file);
-        } else {
-            console.error('File is not an image.');
-        }
-    }
-});
-
-document.getElementById('downloadCanvas').addEventListener('click', x => saveCanvasAsPNG()
-);
-
-function saveCanvasAsPNG() {
-    let canvas = document.getElementById('sandCanvas');
-    let dataURL = canvas.toDataURL('image/png');
-
-    // Create a new anchor element dynamically
-    let downloadLink = document.createElement('a');
-    downloadLink.href = dataURL;
-    downloadLink.download = 'my_sandbox.png';
-
-    // Trigger the download by simulating a click
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-}
-
-
-window.addEventListener("keydown", (e) => {
-
-    switch (e.key) {
-        case "m":
-        case"M":
-        case "Escape":
-            //Menu (controlls)
-            toggleControllVisibility();
-            break;  
-    }
-});
