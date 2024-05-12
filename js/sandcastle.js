@@ -12,7 +12,7 @@ let grainNum = parseInt(canvas.width / grainSize);
 let grainNumV = parseInt(canvas.height / grainSize);
 //Game variables
 let isrunning = false;
-let gameSpeed = 150;
+let gameSpeed = 120;
 //Physics variables
 let ZeroGMode = false; //Disables physics (blocks stay in place) 
 let stickyMode = false; //Grains will only stack verticall and not settle sideways
@@ -27,7 +27,7 @@ let mousedown = false;
 let mouseX;
 let mouseY;
 //Bucket / Eraser Variables
-let spawnAmount = 6; //How much sand is spawned / erased by clicking
+let spawnAmount = 6; //How much sand is spawned (or erased) by clicking
 let eraserMode = false;
 //Color Variables
 let colorBackground = '#000' //Color of empty space
@@ -795,7 +795,7 @@ function physics() {
         }
     }
     //Gravity -----------
-    let direction = false;
+    let direction = false; //switch if going left to right or right to left every row
     for (let i = sandbox.length - 1; i >= 0; i--) {
         if (direction) {
             direction = false
