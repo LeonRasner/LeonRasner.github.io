@@ -1,4 +1,6 @@
 //Leon's Sand Box
+//TODO: improvements - remove onclick functions
+//TODO: Ideas - "Merge" multiple images, Reverse Gravity, Apply diffrent Sticky-Modes to individual grains, multiple "levels", Load diffrent random welcome screens
 
 //INITIAL SETUP ----------------------------------------------------------------------------------------------------------
 
