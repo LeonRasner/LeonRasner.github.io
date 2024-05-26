@@ -153,11 +153,13 @@ justify-content: center;
 }
 
 #buttonWordle{
-  background-image: url();
+  background-image: url("");
 }
 
 #button404{
-  background-image: url();
+  background-image: url("");
+  /* color: #000AFF;
+  text-shadow: none; */
 }
 
 #buttonSandbox{
