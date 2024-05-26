@@ -100,6 +100,14 @@ justify-content: center;
   justify-content: space-around;
 }
 
+#selectionProjects {
+  width: clamp(max(20vh,20vw),MAX(60%,90vh),100%);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
 .buttonHome {
   background-color: #707070;
   width: 30%;
@@ -123,9 +131,43 @@ justify-content: center;
   box-shadow: 8px 8px 0px #A7A7A7;
 }
 
-.buttonHome::not(.animate):hover {
+.buttonHome:hover {
   background-color: #363636;
   transition: 0.3s;
+}
+
+.buttonHome.inactive:hover {
+  background-color: #D9D9D9;
+  transition: none;
+}
+
+.buttonProject {
+  background-size: cover;
+  margin-top: 1.4rem;
+  text-shadow: #707070 0 0 .5rem;
+}
+
+.buttonProject:hover {
+  filter: brightness(1.2);
+  transition: 0.3s;
+}
+
+#buttonWordle{
+  background-image: url("");
+}
+
+#button404{
+  background-image: url("");
+  /* color: #000AFF;
+  text-shadow: none; */
+}
+
+#buttonSandbox{
+  background-image: url("/images/icon_sandbox_1.png");
+}
+
+#buttonEcosys{
+  background-image: url();
 }
 
 .buttonProject h2 {
