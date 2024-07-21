@@ -7,12 +7,22 @@ let size;
     let middle;
 
     let reset = false;
+    let paused = false;
 
     window.onload = (event) => {
         newRandomBinarySearch();
         document.getElementById("resetRandomBtn").addEventListener("click", function (e) {
             reset = true;
             newRandomBinarySearch();
+        })
+        newRandomBinarySearch();
+        document.getElementById("pauseBtn").addEventListener("click", function (e) {
+            paused = !paused;
+            if (paused) {
+                document.getElementById("pauseBtn").classList.add("paused");
+            } else {
+                document.getElementById("pauseBtn").classList.remove("paused");
+            }
         })
     };
 
@@ -29,14 +39,21 @@ let size;
 
     function mainLoop() {
         reset = false;
-        drawArrayToViz();
-        if (binarySearchStep()) {
+        if (paused) {
+            setTimeout(() => {
+                if (!reset) mainLoop();
+            }, 700);
+        } else {
             drawArrayToViz();
-            return;
+            if (binarySearchStep()) {
+                drawArrayToViz();
+                return;
+            }
+            setTimeout(() => {
+                if (!reset) mainLoop();
+            }, 700);
         }
-        setTimeout(() => {
-            if (!reset) mainLoop();
-        }, 700);
+
     }
 
     function binarySearchStep() {
