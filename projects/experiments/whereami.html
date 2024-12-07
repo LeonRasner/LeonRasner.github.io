@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Street View + Guessing Map</title>
+  <style>
+    html, body {
+      height: 100%; margin:0; padding:0;
+      font-family: Arial, sans-serif;
+    }
+
+    #street-view {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .guessBox {
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        top: 0;
+        z-index: 999;
+        width: 100vw;
+        min-height: 10vh;
+    }
+
+    #guessButton {
+      padding: 1vh 2vh;
+      font-size: 2.5vh;
+      font-weight: 700;
+      border-radius: 1rem;
+      background: rgb(131,58,180);
+      background: linear-gradient(18deg, rgba(131,58,180,1) 0%, rgba(184,35,95,1) 50%, rgba(131,58,180,1) 100%);
+      cursor: pointer;
+      color: white;
+      border: none;
+        box-shadow: -.3vh .3vh 1vh black;;
+    }
+
+    #closeButton  {
+        padding: 1vh 2vh;
+      font-size: 2vh;
+      font-weight: 500;
+      border-radius: 1rem;
+      background: rgb(121, 108, 129);
+      cursor: pointer;
+      color: white;
+      border: none;
+        box-shadow: -.3vh .3vh 1vh black;;
+    }
+
+    #overlay {
+      position: absolute;
+      top:0; left:0; width:100%; height:100%;
+      background: rgba(255,255,255,0.9);
+      display: none;
+      flex-direction: column;
+      z-index: 3;
+    }
+
+    #winOverlay{
+    position: absolute;
+      top:0; left:0; width:100%; height:100%;
+      background: rgba(255,255,255,0.9);
+      display: none;
+      flex-direction: column;
+      z-index: 4;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #finalWinOverlay{
+    position: absolute;
+      top:0; left:0; width:100%; height:100%;
+      background: rgba(255,255,255);
+      display: none;
+      flex-direction: column;
+      z-index: 5;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.5vh;
+    }
+
+    #map {
+      flex: 1; 
+    }
+
+    .overlayControls {
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 3;
+      min-height: 10vh;
+    }
+
+    .button {
+      padding: 1vh 2vh;
+      font-size: 3vh;
+      font-weight: 700;
+      border-radius: 1rem;
+      background: rgb(131,58,180);
+      background: linear-gradient(18deg, rgba(131,58,180,1) 0%, rgba(184,35,95,1) 50%, rgba(131,58,180,1) 100%);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    #result {
+      font-weight: bold;
+      font-size: 3vh;
+    }
+
+    #resulttxt {
+      font-weight: bold;
+      font-size: 2.5vh;
+    }
+
+    #resulttxt2 {
+      font-size: 2vh;
+    }
+  </style>
+  <script>
+    a = "QUl6YVN5QmRSLUkyR01lR3p3";
+    b = "OG5KY3dJcTRKYklpOEZaMWJwRThB";
+    src= "https://maps.googleapis.com/maps/api/js?key="+ atob(a+b) + "&libraries=geometry"  <!--Dont worry its restricted-->
+  </script>
+</head>
+<body>
+
+<div id="street-view">
+    <div class="guessBox">
+        <button id="guessButton">🔍 Guess Location</button>
+        <button id="closeButton" style="display: none;">❌ Close Map</button>
+    </div>
+  <div id="overlay">
+    <div id="map"></div>
+    <div class="overlayControls">
+      
+      <button id="submitGuess" class="button">📌Submit Guess📌</button>
+    </div>
+  </div>
+  <div id="winOverlay">
+        <h2><span id="resulttxt"></span></h2>
+        <h3><span id="resulttxt2"></span></h3>
+        <h2><span id="result"></span></h2>
+        <div class="overlayControls">
+            <button class="button" id="tryAgain" style="display: none;">Try Again</button>
+            <button class="button" id="nextGuess" style="display: none;">Next guess</button>
+        </div>
+
+  </div>
+  <div id="finalWinOverlay" style="display: none;">
+        <h1>🥇🥇🥇🥇</h1>
+        <h1>YOU DID IT</h1>
+        <h1>🏆🏆🏆🏆</h1>
+        <h2><span id="totalguesses"></span></h2>
+        <h3><span id="avgmeters"></span></h3>
+        <a href="https://www.youtube.com/watch?v=n_qbGJuxCYY" target="_blank">💀 Claim ur price 💀</a>
+        <div class="overlayControls">
+            <button class="button" onclick="window.location.reload()">Play Again</button>
+        </div>
+  </div>
+</div>
+
+<script>
+    const newScript = document.createElement('script')
+    newScript.src = src;
+    document.body.appendChild(newScript)
+</script>
+<script>
+
+const mysteryLocations = [
+  {lat: 47.813132, lng: 13.044739}, //HBF
+  {lat: 47.791839, lng: 12.995149}, //Airport
+  {lat: 47.802756, lng: 13.043779}, //Mozart
+  {lat: 47.795103, lng: 13.048203}, //Castle
+  {lat: 47.798599, lng: 13.054396}, //Bridge
+  {lat: 47.802570, lng: 13.066756}, //Asia
+  {lat: 47.756511, lng: 13.066036}, //Zoo
+  {lat: 35.704074, lng: 139.557732}, //JPN
+];
+
+let totalguesses = 0;
+let totalmeters = 0;
+
+let currentIndex = 0;
+let streetViewPanorama;
+let map;
+let guessMarker;
+let currentLocation = mysteryLocations[currentIndex];
+
+function initStreetView() {
+  streetViewPanorama = new google.maps.StreetViewPanorama(
+    document.getElementById("street-view"),
+    {
+      position: currentLocation,
+      pov: { heading: 0, pitch: 0 },
+      zoom: 0,
+      disableDefaultUI: true,
+      scrollwheel: true,
+      linksControl: false,
+      clickToGo: false,
+      addressControl: false,
+      showRoadLabels: false
+    }
+  );
+}
+
+function initMap() {
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 47.810504, lng: 13.032023 },
+    zoom: 14
+  });
+
+  map.addListener('click', (e) => {
+    placeGuessMarker(e.latLng);
+  });
+}
+
+function placeGuessMarker(location) {
+  if (guessMarker) {
+    guessMarker.setPosition(location);
+  } else {
+    guessMarker = new google.maps.Marker({
+      position: location,
+      map: map,
+      title: 'Your Guess'
+    });
+  }
+}
+
+function calculateDistance() {
+  if (!guessMarker) {
+    document.getElementById("result").textContent = "Please place a guess marker.";
+    return;
+  }
+
+  const actualLocation = new google.maps.LatLng(currentLocation.lat, currentLocation.lng);
+  const guessLocation = guessMarker.getPosition();
+  const distanceInMetersnum = google.maps.geometry.spherical.computeDistanceBetween(actualLocation, guessLocation);
+  const distanceInMeters = distanceInMetersnum.toFixed(0);
+  const distanceInKilometers = (distanceInMeters / 1000).toFixed(2);
+
+  document.getElementById("result").textContent = `You were ${distanceInMeters} m away.`;
+
+  // Define a threshold distance in kilometers (e.g. 500 km)
+  const threshold = 500;
+  totalmeters += distanceInMetersnum;
+  totalguesses ++;
+  
+  if (distanceInMeters < threshold) {
+    document.getElementById("resulttxt").textContent = "🔥🔥 Noiceeeee 👌👌🔥🔥";
+    document.getElementById("resulttxt2").textContent = "";
+    // Close enough! Move to the next location
+    displayWin(true);
+  } else {
+    document.getElementById("resulttxt").textContent = "👎👎 SAD 👎👎";
+    document.getElementById("resulttxt2").textContent = "Try to get within 500m";
+    displayWin(false);
+  }
+
+}
+
+function displayWin(won) {
+    const winoverlay = document.getElementById('winOverlay');
+    const close = document.getElementById('closeButton');
+    const tryAgain = document.getElementById('tryAgain');
+    const nextGuess = document.getElementById('nextGuess');
+    close.style.display = "none";
+    winoverlay.style.display = 'flex';
+    if(won) {
+        currentIndex = (currentIndex + 1);
+        if(currentIndex >= mysteryLocations.length) {
+        showFinalWin();
+    } else {
+        nextGuess.style.display = 'flex';
+        tryAgain.style.display = 'none';
+        nextGuess.addEventListener('click', () => {
+            winoverlay.style.display = 'none';
+            nextGuess.style.display = 'none';
+            tryAgain.style.display = 'none';
+            nextLocation();
+        });
+    }
+    } else {
+        tryAgain.style.display = 'flex';
+        tryAgain.addEventListener('click', () => {
+            winoverlay.style.display = 'none';
+            tryAgain.style.display = 'none';
+            close.style.display = "flex";
+        });
+    }
+}
+
+function nextLocation() {
+    currentLocation = mysteryLocations[currentIndex];
+    const guessButton = document.getElementById('guessButton');
+    const closeButton = document.getElementById('closeButton');
+    
+    // Reset guess marker
+    if (guessMarker) {
+        guessMarker.setMap(null);
+        guessMarker = null;
+    }
+
+    // Hide the overlay and update street view
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('result').textContent = '';
+    guessButton.style.display = "flex";
+    closeButton.style.display = "none";
+
+    streetViewPanorama.setPosition(currentLocation);
+}
+
+function showFinalWin() {
+    document.getElementById('closeButton').style.display = "none";
+    document.getElementById("totalguesses").textContent = "Total Guesses: " + totalguesses;
+    document.getElementById("avgmeters").textContent = "Average Distance: " + (totalmeters / totalguesses).toFixed(2) + "m";
+    document.getElementById("finalWinOverlay").style.display = "flex";
+}
+
+window.onload = () => {
+  initStreetView();
+  initMap();
+
+  const guessButton = document.getElementById('guessButton');
+  const closeButton = document.getElementById('closeButton');
+  const overlay = document.getElementById('overlay');
+  const submitGuess = document.getElementById('submitGuess');
+
+  guessButton.addEventListener('click', () => {
+    overlay.style.display = 'flex';
+    guessButton.style.display = 'none';
+    closeButton.style.display = 'flex';
+  });
+
+  closeButton.addEventListener('click', () => {
+    overlay.style.display = 'none';
+    guessButton.style.display = 'flex';
+    closeButton.style.display = 'none';
+  });
+
+  submitGuess.addEventListener('click', () => {
+    calculateDistance();
+  });
+};
+
+</script>
+</body>
+</html>
