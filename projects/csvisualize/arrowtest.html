@@ -1,0 +1,85 @@
+<canvas id="canvas" width="800" height="800">
+
+</canvas>
+
+
+
+<script>
+    let canvas;
+    let ctx;
+    document.addEventListener('DOMContentLoaded', start);
+
+    function start() {
+        canvas = document.getElementById('canvas');
+        ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
+        resizeCanvas();
+        listenforShot();
+        gameLoop();
+    }
+    function gameLoop() {
+        // clearScreen();
+        //drawArrow((Math.random()-0.5)*2*canvas.width, (Math.random()-0.5)*2*canvas.height, (Math.random()-0.5)*2*canvas.width, (Math.random()-0.5)*2*canvas.height,"red");
+        // drawArrow()
+        requestAnimationFrame(gameLoop);
+    }
+    function listenforShot() {
+        canvas.addEventListener('mousedown', function(event) {
+        const downX = event.clientX;
+        const downY = event.clientY;
+        console.log('Mouse down at:', downX, downY);
+
+        function onMouseUp(event) {
+            const upX = event.clientX;
+            const upY = event.clientY;
+            console.log('Mouse up at:', upX, upY);
+            console.log('From down to up:', `(${downX}, ${downY}) to (${upX}, ${upY})`);
+
+            // Cleanup: Remove this event listener once it's triggered.
+            canvas.removeEventListener('mouseup', onMouseUp);
+        }
+
+        // Listen for mouse up event on the canvas
+        canvas.addEventListener('mouseup', onMouseUp);
+    });
+    }
+    function shootArrow(x,y,xv,yv) {
+        
+    }
+    function drawArrow(x, y, vx, vy, color) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + vx, y + vy);
+        ctx.strokeStyle = color;
+        ctx.stroke();
+    }
+    function clearScreen() {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    function resizeCanvas() {
+        let container = canvas.parentNode;
+
+        let maxWidth = 1200;
+        let maxHeight = 1200;
+        // Aspect ratio
+        let ratio = Math.min(maxWidth / container.clientWidth, maxHeight / container.clientHeight);
+
+        let width = container.clientWidth * ratio;
+        let height = container.clientHeight * ratio;
+
+        width = Math.min(width, maxWidth);
+        height = Math.min(height, maxHeight);
+
+        canvas.width = width;
+        canvas.height = height;
+    }
+</script>
+<style>
+    #canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>
