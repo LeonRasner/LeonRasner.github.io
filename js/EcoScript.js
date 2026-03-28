@@ -18,9 +18,9 @@ const grid = {};
 var speciesList = new Array();
 
 // Default Species
-speciesList.push(createSpecies("TameGreens", "green", 2, 0.3, 1));
+speciesList.push(createSpecies("TameGreens", "lightgreen", 2, 0.3, 1));
 speciesList.push(createSpecies("QuickYellows", "yellow", 6, 0.1, 3));
-speciesList.push(createSpecies("HungryBlues", "blue", 3, 0.4, 5));
+speciesList.push(createSpecies("HungryBlues", "cyan", 3, 0.4, 5));
 
 //TODO: Ideas:
 //Zoom & Pan Function
