@@ -18,7 +18,7 @@ let grid = {};
 let speciesList = new Array();
 
 // Default Species
-speciesList.push(createSpecies("TameGreens", "lightgreen", 2, 0.01, 1,0));
+speciesList.push(createSpecies("SadGreens", "darkgreen", 2, 0.01, 1,0));
 speciesList.push(createSpecies("QuickYellows", "yellow", 6, 0.03, 3,1));
 speciesList.push(createSpecies("HungryBlues", "cyan", 3, 0.01, 5,2));
 
@@ -32,12 +32,12 @@ speciesList.push(createSpecies("HungryBlues", "cyan", 3, 0.01, 5,2));
 
 //Start Game
 gameLoop();
-spawnCreatures(speciesList[0], 100, "ClusterSpwan");
-spawnCreatures(speciesList[0], 100, "ClusterSpwan");
-spawnCreatures(speciesList[1], 50, "ClusterSpwan");
-spawnCreatures(speciesList[2], 30, "ClusterSpwan");
+spawnCreatures(speciesList[0], 100, "randomSpawn");
+spawnCreatures(speciesList[0], 100, "ClusterSpawn");
+spawnCreatures(speciesList[1], 50, "ClusterSpawn");
+spawnCreatures(speciesList[2], 30, "ClusterSpawn");
 
-function gameLoop() {
+function gameLoop() { 
   if (gamePaused) return;
 
   clearScreen();
@@ -113,13 +113,13 @@ function restartGame() {
 function spawnCreatures(species, number, pattern) {
   number = number < 1000 ? number : 1000; //limit number to 1k
   //Randomly spawn all over canvas
-  if (pattern == 'randomSpwan') {
+  if (pattern == 'randomSpawn') {
     for (i = 0; i < number; i++) {
       entities.push(new species(Math.floor(Math.random() * canvas.width), Math.floor(Math.random() * canvas.height)));
     }
   }
   // Randomly spawn in a 50px radius of a random point on canvas
-  else if (pattern == 'ClusterSpwan') {
+  else if (pattern == 'ClusterSpawn') {
     const randomPosX = Math.floor(Math.random() * (canvas.height - canvas.height / 10)) + canvas.height / 20;
     const randomPosY = Math.floor(Math.random() * (canvas.height - canvas.height / 10)) + canvas.height / 20;
 

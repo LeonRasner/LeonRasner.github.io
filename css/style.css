@@ -153,11 +153,11 @@ justify-content: center;
 }
 
 #buttonWordle{
-  background-image: url("");
+  background-image: url("/images/icon_wordle.png");
 }
 
 #button404{
-  background-image: url("");
+  background-image: url("/images/icon_snake.png");
   /* color: #000AFF;
   text-shadow: none; */
 }
@@ -167,7 +167,7 @@ justify-content: center;
 }
 
 #buttonEcosys{
-  background-image: url();
+  background-image: url("/images/icon_ecosim.png");
 }
 
 .buttonProject h2 {
