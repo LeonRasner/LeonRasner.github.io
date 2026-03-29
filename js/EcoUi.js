@@ -43,13 +43,14 @@ openSpeciesButton.addEventListener('click', () => {
 });
 
 speciesButton.addEventListener('click', () => {
-  let name = document.getElementById('SpeciesName').value;
-  let color = document.getElementById('SpeciesColor').value;
-  let speed = document.getElementById('SpeciesSpeed').value;
-  let directionBehavior = document.getElementById('SpeciesDirection').value;
-  let agression = document.getElementById('SpeciesAgression').value;
+  const name = document.getElementById('SpeciesName').value;
+  const color = document.getElementById('SpeciesColor').value;
+  const speed = document.getElementById('SpeciesSpeed').value;
+  const directionBehavior = document.getElementById('SpeciesDirection').value;
+  const agression = document.getElementById('SpeciesAgression').value;
+  const speciesId = speciesList.length ? speciesList.length + 1 : 0;
 
-  let newSpecies = createSpecies(name, color, speed, directionBehavior, agression);
+  const newSpecies = createSpecies(name, color, speed, directionBehavior, agression);
   if (speciesList.findIndex(s => s.displayName == name) == -1) {
     if (speciesList.findIndex(s => s.displayColor == color) == -1) {
       speciesList.push(newSpecies);

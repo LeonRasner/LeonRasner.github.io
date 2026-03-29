@@ -7,20 +7,20 @@ let gamePaused = false;
 
 
 //Initialize Enteties
-var entities = new Array();
-var misc = new Array();
+let entities = new Array();
+let misc = new Array();
 
 //Initialize grid
 const gridSize = 50;
-const grid = {};
+let grid = {};
 
 //Initialize Creatures
-var speciesList = new Array();
+let speciesList = new Array();
 
 // Default Species
-speciesList.push(createSpecies("TameGreens", "lightgreen", 2, 0.3, 1));
-speciesList.push(createSpecies("QuickYellows", "yellow", 6, 0.1, 3));
-speciesList.push(createSpecies("HungryBlues", "cyan", 3, 0.4, 5));
+speciesList.push(createSpecies("TameGreens", "lightgreen", 2, 0.3, 1,0));
+speciesList.push(createSpecies("QuickYellows", "yellow", 6, 0.1, 3,1));
+speciesList.push(createSpecies("HungryBlues", "cyan", 3, 0.4, 5,2));
 
 //TODO: Ideas:
 //Zoom & Pan Function
@@ -41,7 +41,10 @@ function gameLoop() {
 
   clearScreen();
   drawMisc();
+
+  rebuildGrid();
   updateEnteties();
+  purgeDeadEntities();
 
   setTimeout(gameLoop, 1000 / gameSpeed); //update screen "gameSpeed" times a second
 }
@@ -71,6 +74,23 @@ function getGridCoordinates(posX, posY, gridSize) {
   };
 }
 
+
+function rebuildGrid() {
+    grid = {};
+
+    for (const entity of entities) {
+        if (entity.isDead) continue;
+
+        const { x, y } = getGridCoordinates(entity.posX, entity.posY, gridSize);
+
+        if (!grid[x]) grid[x] = {};
+        if (!grid[x][y]) grid[x][y] = [];
+
+        grid[x][y].push(entity);
+        entity.currentGrid = { x, y };
+    }
+}
+
 function pauseUnpause() {
   gamePaused = !gamePaused;
   pauseButton.textContent = gamePaused ? 'Resume' : 'Pause';
@@ -82,7 +102,7 @@ function pauseUnpause() {
 function restartGame() {
   entities = new Array();
   misc = new Array();
-
+  grid = {};
   gameLoop();
 }
 

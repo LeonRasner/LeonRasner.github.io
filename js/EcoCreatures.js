@@ -1,6 +1,6 @@
 //Creature Class with general atributes
 class Creature {
-    constructor(color, posX, posY, speed, directionBehavior, agression) {
+    constructor(color, posX, posY, speed, directionBehavior, agression, speciesId) {
         this.color = color;
         this.posX = posX;
         this.posY = posY;
@@ -10,13 +10,21 @@ class Creature {
         this.currentGrid = getGridCoordinates(posX, posY, gridSize);
         this.neighbours = [];
         this.agression = agression;
+        this.speciesId = speciesId;
+        this.isDead = false;
     }
+
     update() {
+        if (this.isDead) return;
+
         this.getNearbyEnteties();
         this.interact();
+        if (this.isDead) return;
+
         this.updateDirection();
+        if (this.isDead) return;
+
         this.move();
-        this.gridPos();
     }
 
     draw() {
@@ -28,12 +36,29 @@ class Creature {
 
     getNearbyEnteties() {
         this.neighbours = [];
-        if (grid && grid[this.currentGrid.x] && grid[this.currentGrid.x][this.currentGrid.y]) {
-            grid[this.currentGrid.x][this.currentGrid.y].forEach(el => {
-                this.neighbours.push(el);
-            });
-        }
 
+        const scanRadius = 1;
+
+        if (!grid || !this.currentGrid) return;
+
+        const startX = this.currentGrid.x - scanRadius;
+        const endX = this.currentGrid.x + scanRadius;
+        const startY = this.currentGrid.y - scanRadius;
+        const endY = this.currentGrid.y + scanRadius;
+
+        for (let x = startX; x <= endX; x++) {
+            if (!grid[x]) continue;
+
+            for (let y = startY; y <= endY; y++) {
+                if (!grid[x][y]) continue;
+
+                grid[x][y].forEach(el => {
+                     if (!el.isDead) {
+                        this.neighbours.push(el);
+                    }
+                });
+            }
+        }
     }
 
 
@@ -51,10 +76,8 @@ class Creature {
         }
         //self destruct if outside canvas (for click spawn)
         if (this.posX > canvas.width + 10 || this.posX < -10 ||this.posY > canvas.height + 10 || this.posY < -10 ) {
-            const index = entities.indexOf(this);
-            if (index !== -1) {
-                entities.splice(index, 1);
-            }
+            removeEntity(this);
+            return;
         }
     };
 
@@ -68,6 +91,7 @@ class Creature {
 
     //Update grid Position
     gridPos() {
+        if (this.isDead) return;
         // Remove this creature from its previous grid position
         const prevGrid = this.currentGrid;
         if (grid[prevGrid.x] && grid[prevGrid.x][prevGrid.y]) {
@@ -86,30 +110,34 @@ class Creature {
     }
 
     interact() {
-        if (this.neighbours[1]) {
+        if (this.neighbours[0]) {
             this.neighbours.forEach(entity => {
                 if (entity != this) {
                     //This is agressor
-                    if (entity.agression < this.agression) {
-                        if (Math.random < 0.90) {
-                            this.direction = entity.direction;
-                        }
+                    if (entity.speciesId != this.speciesId && entity.agression < this.agression) {
+                        //Move towards prey
+                        const dx = entity.posX - this.posX;
+                        const dy = entity.posY - this.posY;
+                        const length = Math.hypot(dx, dy);
+                        this.direction = length === 0
+                        ? { x: 0, y: 0 }
+                        : { x: dx / length, y: dy / length };
+
                         //Kill
                         if (Math.abs(entity.posX - this.posX) <= 5 && Math.abs(entity.posY - this.posY) <= 5) {
-                            const index = entities.indexOf(entity);
-                            if (index !== -1) {
-                                misc.push(new DeathMarker(entity.posX, entity.posY, entity.color))
-                                entities.splice(index, 1);
-                            }
+                            misc.push(new DeathMarker(entity.posX, entity.posY));
+                            removeEntity(entity);
                         }
                     }
                     //Entity is agressor
-                    else if (entity.agression > this.agression) {
-                        if (Math.random < 0.99) {
-                            this.direction.x = entity.direction.x * -1;
-                            this.direction.y = entity.direction.y * -1;
-                        }
-
+                    else if (entity.speciesId != this.speciesId && entity.agression > this.agression) {
+                        //Flee
+                        const dx = this.posX - entity.posX;
+                        const dy = this.posY - entity.posY;
+                        const length = Math.hypot(dx, dy);
+                        this.direction = length === 0
+                            ? { x: 0, y: 0 }
+                            : { x: dx / length, y: dy / length };
                     }
                     //Set Random direction
                     else if (Math.random() < this.directionBehavior) {
@@ -141,11 +169,19 @@ class Creature {
     }
 }
 
+function removeEntity(entity) {
+    entity.isDead = true;
+}
+
+function purgeDeadEntities() {
+    entities = entities.filter(entity => !entity.isDead);
+}
+
 //Dynamically Create Species
-function createSpecies(name, color, speed, directionBehavior, agression) {
+function createSpecies(name, color, speed, directionBehavior, agression, species) {
     const Species = class extends Creature {
         constructor(posX, posY) {
-            super(color, posX, posY, speed, directionBehavior, agression);
+            super(color, posX, posY, speed, directionBehavior, agression, species);
         }
     };
 
