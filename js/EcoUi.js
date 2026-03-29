@@ -5,9 +5,9 @@ const resetButton = document.getElementById('resetButton');
 const speciesButton = document.getElementById('speciesButton');
 const speciesContainer = document.getElementById('speciesContainer');
 const openSpeciesButton = document.getElementById('openSpeciesButton');
+const spawnNumberInput = document.getElementById('spawnNumberInput');
 const validationMessageCreateSpecies = document.getElementById('validationMessageCreateSpecies');
 const validationMessageSpeciesSpawn = document.getElementById('validationMessageSpeciesSpawn');
-let selectedSpawnBehavior = 'ClusterSpwan';
 
 gameSpeed = gameSpeedSlider.value;
 gamePaused = false;
@@ -60,38 +60,56 @@ speciesButton.addEventListener('click', () => {
       validationMessageCreateSpecies.innerHTML = 'Color already exists';
     }
 
-
   } else {
     validationMessageCreateSpecies.innerHTML = 'Name already exists';
   }
 });
-
-//Change spawn behavior
-document.getElementById('randomSpwan').addEventListener('click', () => {
-  selectedSpawnBehavior = 'randomSpwan';
-  validationMessageSpeciesSpawn.innerHTML = ""
-});
-document.getElementById('ClusterSpwan').addEventListener('click', () => {
-  selectedSpawnBehavior = 'ClusterSpwan';
-  validationMessageSpeciesSpawn.innerHTML = ""
-});
-document.getElementById('ClickSpawn').addEventListener('click', () => {
-  selectedSpawnBehavior = 'ClickSpawn';
-  validationMessageSpeciesSpawn.innerHTML = "Click on spawn first"
-});
-
 
 //Fill Species List
 function updateSpeciesList() {
   const speciesListContainer = document.getElementById('speciesListContainer');
   speciesListContainer.innerHTML = ''; // Clear the container
   const markup = document.createElement('div');
+  markup.style.width = '100%';
   speciesList.forEach(species => {
     const div = document.createElement('div');
     const innerDiv = document.createElement('div');
     innerDiv.classList.add("speciesInnerDiv");
     div.appendChild(innerDiv);
     div.classList.add("speciesContainer");
+    const buttonsDiv = document.createElement('div');
+    buttonsDiv.style.display = 'flex';
+    buttonsDiv.style.flexDirection = 'column';
+    buttonsDiv.style.marginLeft = '6px';
+
+    //Spawn Buttons
+    const btnSpawnClick = document.createElement('div');
+    btnSpawnClick.innerHTML= '<button class="btnSpawn"><small>Spawn</small> 👉</button>';
+    buttonsDiv.appendChild(btnSpawnClick);
+
+    const btnSpawnRandom = document.createElement('div');
+    btnSpawnRandom.innerHTML= '<button class="btnSpawn"><small>Spawn</small> 🎲</button>';
+    buttonsDiv.appendChild(btnSpawnRandom);
+
+    const btnSpawnCluster = document.createElement('div');
+    btnSpawnCluster.innerHTML= '<button class="btnSpawn"><small>Spawn</small> ⭕</button>';
+    buttonsDiv.appendChild(btnSpawnCluster);
+
+    
+    btnSpawnClick.addEventListener('click', () => {
+      const numberOfCreatures = parseInt(spawnNumberInput.value);
+      spawnCreatures(species, numberOfCreatures, 'ClickSpawn');
+    });
+    btnSpawnRandom.addEventListener('click', () => {
+      const numberOfCreatures = parseInt(spawnNumberInput.value);
+      spawnCreatures(species, numberOfCreatures, 'randomSpwan');
+    });
+    btnSpawnCluster.addEventListener('click', () => {
+      const numberOfCreatures = parseInt(spawnNumberInput.value);
+      spawnCreatures(species, numberOfCreatures, 'ClusterSpwan');
+    });
+
+    div.appendChild(buttonsDiv);
   
     const colorDiv = document.createElement('div');
     colorDiv.style.width = '40px';
@@ -105,37 +123,12 @@ function updateSpeciesList() {
     infoDiv.innerHTML = `
       <strong>${species.displayName}</strong><br>
       ${bar(species.displaySpeed, 1, 5, "⚡")}
-      ${bar(species.displayRandomness, 0.01, 0.99, "🎲")}
+      ${bar(species.displayRandomness, 0.01, 0.99, "🔀")}
       ${bar(species.displayAgression, 1, 10, "⚔️")}
     `;
   
-    const inputDiv = document.createElement('div');
-    inputDiv.style.margin = "0 0 0 10px";
-    const spawnNumberInput = document.createElement('input');
-    spawnNumberInput.type = 'number';
-    spawnNumberInput.style.width = '46px';
-    spawnNumberInput.value = '50';
-    spawnNumberInput.max = '1000';
-    spawnNumberInput.min = '1';
-    spawnNumberInput.setAttribute('data-species', species.displayName);
-    inputDiv.appendChild(spawnNumberInput);
-    inputDiv.appendChild(document.createElement('br'));
-  
-    const spawnButton = document.createElement('button');
-    spawnButton.classList.add('spawnButton');
-    spawnButton.setAttribute('data-species', species.displayName);
-    spawnButton.innerText = 'Spawn';
-    inputDiv.appendChild(spawnButton);
-  
-    spawnButton.addEventListener('click', () => {
-      const speciesName = spawnButton.dataset.species;
-      const numberOfCreatures = parseInt(spawnNumberInput.value);
-      spawnCreatures(speciesList[speciesList.findIndex(species => species.displayName == speciesName)], numberOfCreatures, selectedSpawnBehavior);
-    });
-  
     innerDiv.appendChild(colorDiv);
     innerDiv.appendChild(infoDiv);
-    div.appendChild(inputDiv);
     markup.appendChild(div);
   });
   

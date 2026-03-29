@@ -157,18 +157,38 @@ function createSpecies(name, color, speed, directionBehavior, agression) {
     return Species;
 }
 
+
 class DeathMarker {
-    constructor(posX, posY, color) {
-        this.posX = posX;
-        this.posY = posY;
-        this.color = color;
+    constructor(x, y) {
+        this.posX = x;
+        this.posY = y;
+
+        this.maxDespawnCounter = 60;
+        this.despawnCounter = 60;
+
+        this.emoji = "💀";
+        this.fontSize = 15;
     }
 
     draw() {
-        ctx.beginPath();
-        ctx.arc(this.posX, this.posY, 8, 0, 2 * Math.PI);
-        ctx.strokeStyle  = "#990000";
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        if (this.despawnCounter <= 0) {
+            const index = misc.indexOf(this);
+            if (index > -1) {
+                misc.splice(index, 1);
+            }
+            return;
+        }
+
+        const alpha = this.despawnCounter / this.maxDespawnCounter;
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.font = `${this.fontSize}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(this.emoji, this.posX, this.posY);
+        ctx.restore();
+
+        this.despawnCounter--;
     }
 }

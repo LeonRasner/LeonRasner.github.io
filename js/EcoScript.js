@@ -107,6 +107,7 @@ function spawnCreatures(species, number, pattern) {
   // Randomly spawn in a 50px radius of next click on canvas
   else if (pattern == 'ClickSpawn') {
     validationMessageSpeciesSpawn.innerHTML = "Click anywhere on Canvas"
+    canvas.classList.add("clickable");
     function handleClick(event) {
       event.preventDefault();
       const rect = canvas.getBoundingClientRect();
@@ -122,6 +123,8 @@ function spawnCreatures(species, number, pattern) {
 
       // Remove the click event listener after the creature is added
       canvas.removeEventListener('click', handleClick);
+      validationMessageSpeciesSpawn.innerHTML = ""
+      canvas.classList.remove("clickable");
     }
 
     // Add the click event listener

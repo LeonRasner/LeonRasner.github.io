@@ -35,7 +35,12 @@ button {
     width: min(100vw,90vh);
     height: min(100vw,90vh);
     box-shadow: #fff1 0 0 12px, #fff4 0 0 64px;
+    margin-right: 2rem;
     /* border: #fff4 solid 2px; */
+}
+
+#evoCanvas.clickable {
+    cursor: pointer;
 }
 
 #EvoContent {
@@ -82,4 +87,33 @@ button {
     display: none;
 }
 
-/* hi */
+.SpeciesHeader {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.SpeciesHeader > div > input {
+    width: 3rem;
+    border-radius: 5px;
+    background-color: #000;
+    color: white;
+}
+
+.SpeciesHeader > div {
+    align-self: flex-end;
+}
+
+.speciesContainer {
+    padding: .6rem;
+    box-shadow: #fff2 0 0 24px inset;
+    border-radius: .3rem;
+}
+
+.btnSpawn {
+    font-size: .75rem;
+    padding: .3rem .6rem;
+}
