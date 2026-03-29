@@ -35,7 +35,7 @@ gameLoop();
 spawnCreatures(speciesList[0], 100, "ClusterSpwan");
 spawnCreatures(speciesList[0], 100, "ClusterSpwan");
 spawnCreatures(speciesList[1], 50, "ClusterSpwan");
-spawnCreatures(speciesList[2], 50, "ClusterSpwan");
+spawnCreatures(speciesList[2], 30, "ClusterSpwan");
 
 function gameLoop() {
   if (gamePaused) return;
@@ -46,6 +46,9 @@ function gameLoop() {
   rebuildGrid();
   updateEnteties();
   purgeDeadEntities();
+
+  recordSpeciesHistory();
+  drawSpeciesChart();
 
   setTimeout(gameLoop, 1000 / gameSpeed); //update screen "gameSpeed" times a second
 }

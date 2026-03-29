@@ -124,7 +124,7 @@ function updateSpeciesList() {
     infoDiv.innerHTML = `
       <strong>${species.displayName}</strong><br>
       ${bar(species.displaySpeed, 1, 5, "⚡")}
-      ${bar(species.displayRandomness, 0.01, 0.99, "🔀")}
+      ${bar(species.displayRandomness, 0.001, 0.1, "🔀")}
       ${bar(species.displayAgression, 1, 10, "⚔️")}
     `;
   

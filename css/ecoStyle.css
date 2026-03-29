@@ -47,6 +47,30 @@ button {
     display: flex;
 }
 
+.Ui {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+    justify-content: space-between;
+}
+
+.topUi {
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+}
+
+.bottomUi{
+    margin-left: 1rem;
+    max-height: 40vh;
+    overflow: hidden;
+}
+
+#chartCanvas {
+    border: #7e7e80 solid 1px;
+}
+
 .UiMainContainer {
     margin: 0 0 0 16px;
 }

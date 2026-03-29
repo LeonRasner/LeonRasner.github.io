@@ -196,6 +196,7 @@ function purgeDeadEntities() {
 
 //Dynamically Create Species
 function createSpecies(name, color, speed, directionBehavior, agression, species) {
+    speciesColors[species] = color;
     const Species = class extends Creature {
         constructor(posX, posY) {
             super(color, posX, posY, speed, directionBehavior, agression, species);

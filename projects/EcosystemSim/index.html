@@ -17,56 +17,65 @@
     <!-- -- -->
     <div id="EvoContent">
         <canvas id="evoCanvas" width="1000" height="1000"></canvas>
-        <div class="UiMainContainer">
-            <div id="gameControls" class="UiContainer">
-                <h3>Controls</h3>
-                <label for="gameSpeed">Simulation Speed:</label>
-                <input type="range" id="gameSpeed" min="1" max="100" value="30" step="1">
-                <br>
-                <button id="pauseButton">Pause</button>
-                <br>
-                <button id="resetButton">Reset Simulation</button>
-            </div>
-            <div id="createSpecies" class="containerFoldable">
-                <h4 id="openSpeciesButton">Create New Species +</h4>
-                <div class="UiContainer hidden" id="speciesContainer">
-                    <label for="SpeciesName">Species Name:</label>
-                    <input type="text" id="SpeciesName" value="New Species">
-                    <br>
-                    <label for="SpeciesColor">Color:</label>
-                    <input type="color" value="#FF9999" id="SpeciesColor" />
-                    <br>
-                    <label for="SpeciesSpeed">⚡ Speed:</label>
-                    <input type="range" id="SpeciesSpeed" min="1" max="5" value="3" step="1">
-                    <br>
-                    <label for="SpeciesDirection">🔀 Movement randomness:</label>
-                    <input type="range" id="SpeciesDirection" min="0.001" max="0.1" value="0.02" step="0.01">
-                    <br>
-                    <label for="SpeciesAgression">⚔️ Aggressiveness:</label>
-                    <input type="range" id="SpeciesAgression" min="1" max="10" value="1" step="1">
-                    <br>
-                    <button id="speciesButton">Create New Species</button>
-                    <p id="validationMessageCreateSpecies" style="color: red;"></p>
-                </div>
-            </div>
-        </div>
-        <div class="UiMainContainer">
-            
-            <div class="UiContainer">
-                <div class="SpeciesHeader">
-                    <h3>Species</h3>
-                    <div>
-                        <label for="spawnNumberInput">Sapwn number:</label>
-                        <input type="number" id="spawnNumberInput" value="50">
+        <div class="Ui">
+            <div class="topUi">
+                <div class="UiMainContainer">
+                    <div id="gameControls" class="UiContainer">
+                        <h3>Controls</h3>
+                        <label for="gameSpeed">Simulation Speed:</label>
+                        <input type="range" id="gameSpeed" min="1" max="100" value="30" step="1">
+                        <br>
+                        <button id="pauseButton">Pause</button>
+                        <br>
+                        <button id="resetButton">Reset Simulation</button>
+                    </div>
+                    <div id="createSpecies" class="containerFoldable">
+                        <h4 id="openSpeciesButton">Create New Species +</h4>
+                        <div class="UiContainer hidden" id="speciesContainer">
+                            <label for="SpeciesName">Species Name:</label>
+                            <input type="text" id="SpeciesName" value="New Species">
+                            <br>
+                            <label for="SpeciesColor">Color:</label>
+                            <input type="color" value="#FF9999" id="SpeciesColor" />
+                            <br>
+                            <label for="SpeciesSpeed">⚡ Speed:</label>
+                            <input type="range" id="SpeciesSpeed" min="1" max="5" value="3" step="1">
+                            <br>
+                            <label for="SpeciesDirection">🔀 Movement randomness:</label>
+                            <input type="range" id="SpeciesDirection" min="0.001" max="0.1" value="0.02" step="0.001">
+                            <br>
+                            <label for="SpeciesAgression">⚔️ Aggressiveness:</label>
+                            <input type="range" id="SpeciesAgression" min="1" max="10" value="1" step="1">
+                            <br>
+                            <button id="speciesButton">Create New Species</button>
+                            <p id="validationMessageCreateSpecies" style="color: red;"></p>
+                        </div>
                     </div>
                 </div>
-                <div id="speciesListContainer">
-
+                <div class="UiMainContainer">
+                
+                    <div class="UiContainer">
+                        <div class="SpeciesHeader">
+                            <h3>Species</h3>
+                            <div>
+                                <label for="spawnNumberInput">Sapwn number:</label>
+                                <input type="number" id="spawnNumberInput" value="50">
+                            </div>
+                        </div>
+                        <div id="speciesListContainer">
+                
+                        </div>
+                        </br>
+                        <strong style="color: green;">Choose a species and click Spawn</strong>
+                        <span id="validationMessageSpeciesSpawn" style="color: red;"></span>
+                    </div>
                 </div>
-            </br>
-                <strong style="color: green;">Choose a species and click Spawn</strong>
-                <span id="validationMessageSpeciesSpawn" style="color: red;"></span>
             </div>
+            <div class="bottomUi">
+                <h3>Population history</h3>
+                <canvas id="chartCanvas" width="900" height="200"></canvas>
+            </div>
+
         </div>
     </div>
 
@@ -81,9 +90,10 @@
     <script src="/js/components.js"></script>
 
     
-    <script src="/js/EcoCreatures.js"></script>
-    <script src="/js/EcoScript.js"></script>
-    <script src="/js/EcoUi.js"></script>
+    <script src="/js/ecoSim/EcoCreatures.js"></script>
+    <script src="/js/ecoSim/EcoChart.js"></script>
+    <script src="/js/ecoSim/EcoScript.js"></script>
+    <script src="/js/ecoSim/EcoUi.js"></script>
 </body>
 
 </html>
