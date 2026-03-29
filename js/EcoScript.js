@@ -18,9 +18,9 @@ let grid = {};
 let speciesList = new Array();
 
 // Default Species
-speciesList.push(createSpecies("TameGreens", "lightgreen", 2, 0.3, 1,0));
-speciesList.push(createSpecies("QuickYellows", "yellow", 6, 0.1, 3,1));
-speciesList.push(createSpecies("HungryBlues", "cyan", 3, 0.4, 5,2));
+speciesList.push(createSpecies("TameGreens", "lightgreen", 2, 0.01, 1,0));
+speciesList.push(createSpecies("QuickYellows", "yellow", 6, 0.03, 3,1));
+speciesList.push(createSpecies("HungryBlues", "cyan", 3, 0.01, 5,2));
 
 //TODO: Ideas:
 //Zoom & Pan Function
@@ -32,8 +32,9 @@ speciesList.push(createSpecies("HungryBlues", "cyan", 3, 0.4, 5,2));
 
 //Start Game
 gameLoop();
-spawnCreatures(speciesList[0], 300, "randomSpwan");
-spawnCreatures(speciesList[1], 50, "randomSpwan");
+spawnCreatures(speciesList[0], 100, "ClusterSpwan");
+spawnCreatures(speciesList[0], 100, "ClusterSpwan");
+spawnCreatures(speciesList[1], 50, "ClusterSpwan");
 spawnCreatures(speciesList[2], 50, "ClusterSpwan");
 
 function gameLoop() {
