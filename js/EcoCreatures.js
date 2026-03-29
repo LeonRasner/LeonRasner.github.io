@@ -12,6 +12,7 @@ class Creature {
         this.agression = agression;
         this.speciesId = speciesId;
         this.isDead = false;
+        this.multiplyChance = 0;
     }
 
     update() {
@@ -52,11 +53,11 @@ class Creature {
             for (let y = startY; y <= endY; y++) {
                 if (!grid[x][y]) continue;
 
-                grid[x][y].forEach(el => {
-                     if (!el.isDead) {
+                for (const el of grid[x][y]) {
+                    if (!el.isDead && el !== this) {
                         this.neighbours.push(el);
                     }
-                });
+                }
             }
         }
     }
@@ -112,7 +113,7 @@ class Creature {
     interact() {
         if (this.neighbours[0]) {
             this.neighbours.forEach(entity => {
-                if (entity != this) {
+                if (entity != this && !entity.isDead) {
                     //This is agressor
                     if (entity.speciesId != this.speciesId && entity.agression < this.agression) {
                         //Move towards prey
@@ -125,8 +126,9 @@ class Creature {
 
                         //Kill
                         if (Math.abs(entity.posX - this.posX) <= 5 && Math.abs(entity.posY - this.posY) <= 5) {
-                            misc.push(new DeathMarker(entity.posX, entity.posY));
+                            misc.push(new Marker(entity.posX, entity.posY, "💀"));
                             removeEntity(entity);
+                            this.multiplyChance++;
                         }
                     }
                     //Entity is agressor
@@ -166,6 +168,21 @@ class Creature {
             };
         }
 
+        //Multiply
+        if (this.multiplyChance > 2 && this.multiplyChance > Math.random() * 5) {
+            this.multiplyChance = 0;
+            const offsetX = Math.random() * 20 - 10;
+            const offsetY = Math.random() * 20 - 10;
+
+            const offspring = new this.constructor(
+                this.posX + offsetX,
+                this.posY + offsetY
+            );
+
+            entities.push(offspring);
+            misc.push(new Marker(this.posX, this.posY, "❤️"));
+        }
+
     }
 }
 
@@ -194,15 +211,15 @@ function createSpecies(name, color, speed, directionBehavior, agression, species
 }
 
 
-class DeathMarker {
-    constructor(x, y) {
+class Marker {
+    constructor(x, y, character) {
         this.posX = x;
         this.posY = y;
 
         this.maxDespawnCounter = 60;
         this.despawnCounter = 60;
 
-        this.emoji = "💀";
+        this.character = character;
         this.fontSize = 15;
     }
 
@@ -222,7 +239,7 @@ class DeathMarker {
         ctx.font = `${this.fontSize}px sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(this.emoji, this.posX, this.posY);
+        ctx.fillText(this.character, this.posX, this.posY);
         ctx.restore();
 
         this.despawnCounter--;
