@@ -1,6 +1,6 @@
 //Calc Age
 const today = new Date();
-const birth = new Date("1996-03-18");
+const birth = new Date("1996-04-01");
 let age = today.getFullYear() - birth.getFullYear();
 const monthDifference = today.getMonth() - birth.getMonth();
 if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birth.getDate())) {
