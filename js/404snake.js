@@ -1,9 +1,8 @@
-//TODO: Idea: Show Error codes matching current score: https://umbraco.com/knowledge-base/http-status-codes/
 //Initialize Canvas
 const canvas = document.getElementById('snake');
 const ctx = canvas.getContext('2d');
 
-//Grid dimesnions
+//Grid dimensions
 let tileCount = 30;
 let tileSize = canvas.width / tileCount;
 
@@ -11,9 +10,18 @@ let tileSize = canvas.width / tileCount;
 let gameRunning = false;
 const initialGameSpeed = 8;
 const initialGameSpeedMod = 1.0;
-let gameSpeed; //TODO: Fix Input Lag
+let gameSpeed;
 let gameSpeedMod;
-let keyPressed = false;
+
+//Input buffering
+let directionQueue = [];
+const maxDirectionQueue = 2;
+
+//Game loop timing
+let animationFrameId = null;
+let lastFrameTime = 0;
+let tickAccumulator = 0;
+const maxTicksPerFrame = 5;
 
 //Snake length
 let snakeLength;
@@ -34,6 +42,7 @@ let appleY = 1;
 //Sprites
 const appleImage = new Image();
 appleImage.src = '/images/Apple2.png';
+
 const snakeImage = new Image();
 snakeImage.src = '/images/SnakePart2.png';
 
@@ -42,86 +51,206 @@ document.getElementById('StartSnake').addEventListener('click', evt => {
     if (!gameRunning) {
         startGame();
     } else {
-        endGame();
+        endGame(snakeLength);
     }
 });
+
 document.addEventListener('keyup', evt => {
-    if (evt.code == "Space" && !gameRunning) {
+    if (evt.code === "Space" && !gameRunning) {
         startGame();
     }
 });
 
-//Key-inputs
+//Keyboard inputs
 document.body.addEventListener('keydown', keyDown);
+
 //Mobile Inputs
-let touchstartX = 0
-let touchendX = 0
-let touchstartY = 0
-let touchendY = 0
+let touchstartX = 0;
+let touchendX = 0;
+let touchstartY = 0;
+let touchendY = 0;
+
 document.addEventListener('touchstart', e => {
-    touchstartX = e.changedTouches[0].screenX
-    touchstartY = e.changedTouches[0].screenY
-})
+    if (!gameRunning) return;
+
+    if (e.cancelable) {
+        e.preventDefault();
+    }
+
+    touchstartX = e.changedTouches[0].screenX;
+    touchstartY = e.changedTouches[0].screenY;
+}, { passive: false });
+
+document.addEventListener('touchmove', e => {
+    if (!gameRunning) return;
+
+    if (e.cancelable) {
+        e.preventDefault();
+    }
+}, { passive: false });
 
 document.addEventListener('touchend', e => {
-    touchendX = e.changedTouches[0].screenX
-    touchendY = e.changedTouches[0].screenY
-    checkDirection()
-})
+    if (!gameRunning) return;
+
+    if (e.cancelable) {
+        e.preventDefault();
+    }
+
+    touchendX = e.changedTouches[0].screenX;
+    touchendY = e.changedTouches[0].screenY;
+
+    checkDirection();
+}, { passive: false });
 
 //Initialize Game
 function startGame() {
-    //change text
-    document.getElementById("404p").style.display = "absolute"
-    document.getElementById("404p").innerText = "Use Arrow-Keys or Swipe to move"
+    //Stop any previous loop safely
+    if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+
+    //Change text
+    document.getElementById("404p").style.display = "";
+    document.getElementById("404p").innerText = "Use Arrow-Keys or Swipe to move";
     document.getElementById("404a").innerText = "";
-    document.getElementById("StartSnake").innerText = ""
+    document.getElementById("StartSnake").innerText = "";
     document.getElementById("StartSnake").classList.remove("animate");
     document.getElementById("404h1").classList.add("animate");
+    document.getElementById("404h1").style.color = "";
     document.getElementById("body").classList.add("playing");
+    document.getElementById("body").classList.remove("animateWin");
     document.getElementById("404h2").innerText = "Page Not Found";
     document.getElementById("404h1").innerText = "404";
 
-    //Set letiables
+    //Set variables
     gameRunning = true;
     gameSpeed = initialGameSpeed;
     gameSpeedMod = initialGameSpeedMod;
 
     snakeLength = 3;
     snakeBits.length = 0;
+    directionQueue.length = 0;
 
-    //Set random positions for snake heade and apple - if they overlap, set new random location
+    //Set random snake position
     headX = Math.floor(Math.random() * tileCount);
     headY = Math.floor(Math.random() * tileCount);
-    appleX = Math.floor(Math.random() * tileCount);
-    appleY = Math.floor(Math.random() * tileCount);
-    if ((headX == appleX && headY == appleY)) {
-        headX = Math.floor(Math.random() * tileCount);
-        headY = Math.floor(Math.random() * tileCount);
-        appleX = Math.floor(Math.random() * tileCount);
-        appleY = Math.floor(Math.random() * tileCount);
-    }
 
     xvelocity = 0;
     yvelocity = 0;
 
-    //Draw
-    drawGame();
-}   	
+    snakeBits.push(new snakeBit(headX, headY));
 
-//Draw game every tick
-function drawGame() {
-    clearScreen();
-    drawSnake();
-    changeSnakePosition();
-    checkCollision();
-    keyPressed = false;
-    drawApple();
-    if (checkGameOver()) {
+    placeApple();
+
+    //Reset loop timing
+    tickAccumulator = 0;
+    lastFrameTime = performance.now();
+
+    renderGame();
+    animationFrameId = requestAnimationFrame(drawGame);
+}
+
+//Main loop
+function drawGame(now = performance.now()) {
+    if (!gameRunning) return;
+
+    const delta = Math.min(now - lastFrameTime, 250);
+    lastFrameTime = now;
+    tickAccumulator += delta;
+
+    let ticks = 0;
+    let tickLength = 1000 / gameSpeed;
+
+    while (tickAccumulator >= tickLength && ticks < maxTicksPerFrame) {
+        updateGame();
+
+        if (!gameRunning) {
+            renderGame();
+            return;
+        }
+
+        tickAccumulator -= tickLength;
+        ticks++;
+        tickLength = 1000 / gameSpeed;
+    }
+
+    renderGame();
+    animationFrameId = requestAnimationFrame(drawGame);
+}
+
+//Game state update
+function updateGame() {
+    applyQueuedDirection();
+
+    //Do not move until the player chooses a direction
+    if (xvelocity === 0 && yvelocity === 0) {
+        return;
+    }
+
+    const nextHeadX = headX + xvelocity;
+    const nextHeadY = headY + yvelocity;
+
+    const willEatApple = nextHeadX === appleX && nextHeadY === appleY;
+
+    //Wall collision
+    if (
+        nextHeadX < 0 ||
+        nextHeadX >= tileCount ||
+        nextHeadY < 0 ||
+        nextHeadY >= tileCount
+    ) {
         endGame(snakeLength);
         return;
     }
-    setTimeout(drawGame, 1000 / gameSpeed); //update screen "gameSpeed" times a second
+
+    //If not eating, the tail moves away this tick.
+    //Moving into the current tail cell should be legal.
+    const tailWillMove = !willEatApple && snakeBits.length >= snakeLength;
+    const collisionStartIndex = tailWillMove ? 1 : 0;
+
+    //Body collision
+    for (let i = collisionStartIndex; i < snakeBits.length; i++) {
+        const currentBit = snakeBits[i];
+
+        if (currentBit.xPos === nextHeadX && currentBit.yPos === nextHeadY) {
+            endGame(snakeLength);
+            return;
+        }
+    }
+
+    //Move head
+    headX = nextHeadX;
+    headY = nextHeadY;
+
+    //Add new head position
+    snakeBits.push(new snakeBit(headX, headY));
+
+    //Apple collision
+    if (willEatApple) {
+        snakeLength++;
+        drawScore(snakeLength);
+
+        if (Math.random() < gameSpeedMod) {
+            gameSpeed++;
+        }
+
+        gameSpeedMod = Math.max(gameSpeedMod * 0.9, 0.10);
+
+        placeApple();
+    }
+
+    //Trim tail
+    while (snakeBits.length > snakeLength) {
+        snakeBits.shift();
+    }
+}
+
+//Render only. No game-state mutation here.
+function renderGame() {
+    clearScreen();
+    drawSnake();
+    drawApple();
 }
 
 function clearScreen() {
@@ -132,118 +261,180 @@ function clearScreen() {
 function drawSnake() {
     ctx.fillStyle = '#333333';
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = "5";
-    //Add new sankeBit for head position
-    snakeBits.push(new snakeBit(headX, headY));
-    //remove last snakeBit (if more bits than length)
-    if (snakeBits.length > snakeLength) {
-        snakeBits.shift();
-    }
+    ctx.lineWidth = 5;
     //Loop through Snake bits
     for (let i = 0; i < snakeBits.length; i++) {
-        let currentBit = snakeBits[i];
+        const currentBit = snakeBits[i];
         if (snakeImage.complete) {
-            ctx.drawImage(snakeImage, currentBit.xPos * tileCount, currentBit.yPos * tileCount);
+            ctx.drawImage(
+                snakeImage,
+                currentBit.xPos * tileSize,
+                currentBit.yPos * tileSize,
+                tileSize * 0.9,
+                tileSize * 0.9
+            );
+        } else {
+            ctx.fillRect(
+                currentBit.xPos * tileSize,
+                currentBit.yPos * tileSize,
+                tileSize * 0.9,
+                tileSize * 0.9
+            );
+            ctx.strokeRect(
+                currentBit.xPos * tileSize,
+                currentBit.yPos * tileSize,
+                tileSize * 0.9,
+                tileSize * 0.9
+            );
         }
-        // ctx.fillRect(currentBit.xPos * tileCount, currentBit.yPos * tileCount, tileSize, tileSize);
-        // ctx.strokeRect(currentBit.xPos * tileCount, currentBit.yPos * tileCount, tileSize, tileSize);
     }
 }
 
 function drawApple() {
     if (appleImage.complete) {
-        ctx.drawImage(appleImage, appleX * tileCount, appleY * tileCount);
+        ctx.drawImage(
+            appleImage,
+            appleX * tileSize,
+            appleY * tileSize,
+            tileSize * 0.9,
+            tileSize * 0.9
+        );
+    } else {
+        ctx.fillStyle = "#8AE393";
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+
+        ctx.fillRect(
+            appleX * tileSize,
+            appleY * tileSize,
+            tileSize * 0.9,
+            tileSize * 0.9
+        );
+
+        ctx.strokeRect(
+            appleX * tileSize,
+            appleY * tileSize,
+            tileSize * 0.9,
+            tileSize * 0.9
+        );
     }
-    // ctx.fillStyle = "#8AE393";
-    // ctx.strokeStyle = '#ffffff';
-    // ctx.lineWidth = "2";
-    // ctx.fillRect(appleX * tileCount, appleY * tileCount, tileSize, tileSize)
-    // ctx.strokeRect(appleX * tileCount, appleY * tileCount, tileSize, tileSize)
 }
 
 function keyDown(event) {
+    const directions = {
+        ArrowUp: { x: 0, y: -1 },
+        KeyW: { x: 0, y: -1 },
+
+        ArrowDown: { x: 0, y: 1 },
+        KeyS: { x: 0, y: 1 },
+
+        ArrowLeft: { x: -1, y: 0 },
+        KeyA: { x: -1, y: 0 },
+
+        ArrowRight: { x: 1, y: 0 },
+        KeyD: { x: 1, y: 0 }
+    };
+
+    const direction = directions[event.code];
+
+    if (!direction) return;
+
     event.preventDefault();
-    //up
-    if (event.keyCode == 38 || event.keyCode == 87) {
-        if (yvelocity == 1 || keyPressed) return; //prevent snake from moving in opposite direction
-        yvelocity = -1; //move one tile up
-        xvelocity = 0;
-        keyPressed = true;
+
+    queueDirection(direction.x, direction.y);
+}
+
+function queueDirection(x, y) {
+    const lastDirection = directionQueue.length > 0
+        ? directionQueue[directionQueue.length - 1]
+        : { x: xvelocity, y: yvelocity };
+
+    //Ignore duplicate direction
+    if (lastDirection.x === x && lastDirection.y === y) {
+        return;
     }
-    //down
-    if (event.keyCode == 40 || event.keyCode == 83) {
-        if (yvelocity == -1 || keyPressed) return; //prevent snake from moving in opposite direction
-        yvelocity = 1; //move one tile down
-        xvelocity = 0;
-        keyPressed = true;
+
+    //Prevent instant 180-degree turns
+    if (lastDirection.x === -x && lastDirection.y === -y) {
+        return;
     }
-    //left
-    if (event.keyCode == 37 || event.keyCode == 65) {
-        if (xvelocity == 1 || keyPressed) return; //prevent snake from moving in opposite direction
-        yvelocity = 0;
-        xvelocity = -1; //move one tile left
-        keyPressed = true;
-    }
-    //right
-    if (event.keyCode == 39 || event.keyCode == 68) {
-        if (xvelocity == -1 || keyPressed) return; //prevent snake from moving in opposite direction
-        yvelocity = 0;
-        xvelocity = 1; //move one tile right
-        keyPressed = true;
+
+    if (directionQueue.length < maxDirectionQueue) {
+        directionQueue.push({ x, y });
     }
 }
 
-//Mobile Controls    
+function applyQueuedDirection() {
+    if (directionQueue.length === 0) return;
+
+    const nextDirection = directionQueue.shift();
+
+    //Extra safety against reversing
+    if (
+        xvelocity === -nextDirection.x &&
+        yvelocity === -nextDirection.y
+    ) {
+        return;
+    }
+
+    xvelocity = nextDirection.x;
+    yvelocity = nextDirection.y;
+}
+
+//Mobile Controls
 function checkDirection() {
-    if (Math.abs(touchendX - touchstartX) > Math.abs(touchendY - touchstartY)) {
-        //Horizontal
-        if (touchendX < touchstartX && (touchstartX - touchendX)) {
-            //Left
-            if (xvelocity == 1 || keyPressed) return; //prevent snake from moving in opposite direction
-            yvelocity = 0;
-            xvelocity = -1; //move one tile left
-            keyPressed = true;
+    const dx = touchendX - touchstartX;
+    const dy = touchendY - touchstartY;
+
+    const minimumSwipeDistance = 24;
+
+    if (
+        Math.abs(dx) < minimumSwipeDistance &&
+        Math.abs(dy) < minimumSwipeDistance
+    ) {
+        return;
+    }
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx < 0) {
+            queueDirection(-1, 0);
         } else {
-            //Right
-            if (xvelocity == -1 || keyPressed) return; //prevent snake from moving in opposite direction
-            yvelocity = 0;
-            xvelocity = 1; //move one tile right
-            keyPressed = true;
+            queueDirection(1, 0);
         }
     } else {
-        //Vertical
-        if (touchendY < touchstartY && (touchstartY - touchendY)) {
-            //Up
-            if (yvelocity == 1 || keyPressed) return; //prevent snake from moving in opposite direction
-            yvelocity = -1; //move one tile up
-            xvelocity = 0;
-            keyPressed = true;
+        if (dy < 0) {
+            queueDirection(0, -1);
         } else {
-            //Down
-            if (yvelocity == -1 || keyPressed) return; //prevent snake from moving in opposite direction
-            yvelocity = 1; //move one tile down
-            xvelocity = 0;
-            keyPressed = true;
+            queueDirection(0, 1);
         }
     }
 }
 
-function changeSnakePosition() {
-    headX = headX + xvelocity;
-    headY = headY + yvelocity;
-}
+function placeApple() {
+    const freeTiles = [];
 
-function checkCollision() {
-    if (appleX == headX && appleY == headY) {
-        appleX = Math.floor(Math.random() * tileCount);
-        appleY = Math.floor(Math.random() * tileCount);
-        snakeLength++;
-        drawScore(snakeLength);
-        if (Math.random() < gameSpeedMod) {
-            gameSpeed++;
-        };
-        gameSpeedMod = Math.max(gameSpeedMod *= 0.9, 0.10);
+    for (let y = 0; y < tileCount; y++) {
+        for (let x = 0; x < tileCount; x++) {
+            const occupied = snakeBits.some(bit => {
+                return bit.xPos === x && bit.yPos === y;
+            });
+
+            if (!occupied) {
+                freeTiles.push({ x, y });
+            }
+        }
     }
+
+    if (freeTiles.length === 0) {
+        win();
+        endGame(snakeLength);
+        return;
+    }
+
+    const chosenTile = freeTiles[Math.floor(Math.random() * freeTiles.length)];
+
+    appleX = chosenTile.x;
+    appleY = chosenTile.y;
 }
 
 function drawScore(score) {
@@ -252,7 +443,7 @@ function drawScore(score) {
     drawCodes(score);
     //Hiede tutorial after first point
     if (snakeLength > 3) {
-        document.getElementById("404p").innerText = ""
+        document.getElementById("404p").innerText = "";
     }
 }
 
@@ -272,33 +463,17 @@ function win() {
     document.getElementById("body").classList.add("animateWin");
 }
 
-function checkGameOver() {
-    let isGameOver = false;
-    //Check if game is running
-    if (gameRunning && !(yvelocity === 0 && xvelocity === 0)) {
-        //If snake head has left bounds, game is over;
-        if (headX < 0 || headX >= tileCount || headY < 0 || headY >= tileCount) {
-            isGameOver = true;
-        } else {
-            //Check collision of head with body for each snakeBit
-            for (let i = 0; i < snakeBits.length; i++) {
-                let currentBit = snakeBits[i];
-                if (currentBit.xPos === headX && currentBit.yPos === headY) {
-                    isGameOver = true;
-                    break;
-                }
-            }
-        }
-    }
-    return isGameOver;
-}
-
 function endGame(score) {
     gameRunning = false;
-    //change text
-    document.getElementById("404p").innerText = "Game Over"
+
+    if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+
+    document.getElementById("404p").innerText = "Game Over";
     document.getElementById("404a").innerText = "Go back to Homepage";
-    document.getElementById("StartSnake").innerText = "Or Play again!"
+    document.getElementById("StartSnake").innerText = "Or Play again!";
     document.getElementById("StartSnake").classList.add("animate");
     document.getElementById("404h1").classList.remove("animate");
     document.getElementById("404h1").style.color = "green";
@@ -314,39 +489,39 @@ class snakeBit {
 
 let errors = {
     404 : "Page Not Found",
-    405	: "Method Not Allowed",
-    406	: "Not Acceptable",
-    407	: "Proxy Authentication Required",
-    408	: "Request Timeout",
-    409	: "Conflict",
-    410	: "Gone",
-    411	: "Length Required",
-    412	: "Precondition Failed",
-    413	: "Payload Too Large",
-    414	: "URI Too Long",
-    415	: "Unsupported Media Type",
-    416	: "Range Not Satisfiable",
-    417	: "Expectation Failed",
-    418	: "I'm a Teapot",
-    421	: "Misdirected Request",
-    422	: "Unprocessable Entity",
-    423	: "Locked",
-    424	: "Failed Dependency",
-    425	: "Too Early",
-    426	: "Upgrade Required",
-    428	: "Precondition Required",
-    429	: "Too Many Requests",
-    431	: "Request Header Fields Too Large",
-    451	: "Unavailable For Legal Reasons",
-    500	: "Internal Server Error",
-    501	: "Not Implemented",
-    502	: "Bad Gateway",
-    503	: "Service Unavailable",
-    504	: "Gateway Timeout",
-    505	: "HTTP Version Not Supported",
-    506	: "letiant Also Negotiates",
-    507	: "Insufficient Storage",
-    508	: "Loop Detected",
-    510	: "Not Extended",
-    511	: "Network Authentication Required"
-}
+    405 : "Method Not Allowed",
+    406 : "Not Acceptable",
+    407 : "Proxy Authentication Required",
+    408 : "Request Timeout",
+    409 : "Conflict",
+    410 : "Gone",
+    411 : "Length Required",
+    412 : "Precondition Failed",
+    413 : "Payload Too Large",
+    414 : "URI Too Long",
+    415 : "Unsupported Media Type",
+    416 : "Range Not Satisfiable",
+    417 : "Expectation Failed",
+    418 : "I'm a Teapot",
+    421 : "Misdirected Request",
+    422 : "Unprocessable Entity",
+    423 : "Locked",
+    424 : "Failed Dependency",
+    425 : "Too Early",
+    426 : "Upgrade Required",
+    428 : "Precondition Required",
+    429 : "Too Many Requests",
+    431 : "Request Header Fields Too Large",
+    451 : "Unavailable For Legal Reasons",
+    500 : "Internal Server Error",
+    501 : "Not Implemented",
+    502 : "Bad Gateway",
+    503 : "Service Unavailable",
+    504 : "Gateway Timeout",
+    505 : "HTTP Version Not Supported",
+    506 : "Variant Also Negotiates",
+    507 : "Insufficient Storage",
+    508 : "Loop Detected",
+    510 : "Not Extended",
+    511 : "Network Authentication Required"
+};
